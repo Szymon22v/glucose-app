@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GlucoScan – Analiza Glukozy</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ── Reset & variables ─────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:          #f0f4f8;
+      --surface:     #ffffff;
+      --border:      #dde3ea;
+      --text:        #1a2332;
+      --muted:       #7a8a9a;
+      --accent:      #1e6fff;
+      --accent-soft: #e8f0ff;
+
+      --ok:          #12b76a;
+      --ok-bg:       #ecfdf5;
+      --ok-border:   #a6f4c5;
+
+      --warn:        #f59e0b;
+      --warn-bg:     #fffbeb;
+      --warn-border: #fde68a;
+
+      --danger:      #ef4444;
+      --danger-bg:   #fef2f2;
+      --danger-border:#fecaca;
+
+      --radius:      16px;
+      --shadow:      0 4px 24px rgba(30,50,80,.08);
+      --shadow-lg:   0 12px 40px rgba(30,50,80,.14);
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* ── Header ────────────────────────────────────────────────── */
+    header {
+      width: 100%;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      height: 64px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .logo-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: pulse 2.4s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: .5; transform: scale(.8); }
+    }
+    .logo-text { font-weight: 700; font-size: 1.15rem; letter-spacing: -.01em; }
+    .logo-text span { color: var(--accent); }
+    .header-sub { margin-left: auto; font-size: .82rem; color: var(--muted); }
+
+    /* ── Main layout ───────────────────────────────────────────── */
+    main {
+      width: 100%;
+      max-width: 760px;
+      padding: 3rem 1.5rem 5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    /* ── Hero ──────────────────────────────────────────────────── */
+    .hero h1 {
+      font-size: clamp(1.7rem, 4vw, 2.4rem);
+      font-weight: 700;
+      letter-spacing: -.03em;
+      line-height: 1.2;
+    }
+    .hero h1 em { font-style: normal; color: var(--accent); }
+    .hero p {
+      margin-top: .7rem;
+      color: var(--muted);
+      font-size: 1.05rem;
+      max-width: 520px;
+      line-height: 1.6;
+    }
+
+    /* ── Card ──────────────────────────────────────────────────── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .card-header {
+      padding: 1.2rem 1.6rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+    }
+    .card-header .step {
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      font-size: .75rem;
+      font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .card-header h2 { font-size: 1rem; font-weight: 600; }
+    .card-body { padding: 1.6rem; }
+
+    /* ── Drop zone ─────────────────────────────────────────────── */
+    .drop-zone {
+      border: 2px dashed var(--border);
+      border-radius: 12px;
+      padding: 2.5rem 1.5rem;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color .2s, background .2s;
+      position: relative;
+    }
+    .drop-zone:hover, .drop-zone.drag-over {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+    }
+    .drop-zone input[type="file"] {
+      position: absolute; inset: 0;
+      opacity: 0; cursor: pointer;
+      width: 100%; height: 100%;
+    }
+    .drop-icon {
+      font-size: 2.4rem;
+      margin-bottom: .6rem;
+      display: block;
+    }
+    .drop-zone p { color: var(--muted); font-size: .95rem; }
+    .drop-zone p strong { color: var(--text); }
+    #file-name {
+      margin-top: 1rem;
+      font-family: 'DM Mono', monospace;
+      font-size: .82rem;
+      color: var(--accent);
+      min-height: 1.2em;
+    }
+
+    /* ── Button ────────────────────────────────────────────────── */
+    .btn {
+      display: inline-flex; align-items: center; gap: .5rem;
+      padding: .75rem 1.8rem;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform .15s, box-shadow .15s, background .15s;
+      box-shadow: 0 4px 12px rgba(30,111,255,.3);
+    }
+    .btn:hover { background: #1257e0; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(30,111,255,.4); }
+    .btn:active { transform: translateY(0); }
+    .btn:disabled { background: #a0b3cc; box-shadow: none; cursor: not-allowed; transform: none; }
+    .btn-row { margin-top: 1.2rem; display: flex; align-items: center; gap: 1rem; }
+
+    /* ── Spinner ───────────────────────────────────────────────── */
+    .spinner {
+      display: none;
+      width: 20px; height: 20px;
+      border: 2.5px solid rgba(30,111,255,.2);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading .spinner { display: block; }
+    .loading .btn-text { display: none; }
+
+    /* ── Result card ───────────────────────────────────────────── */
+    #result {
+      display: none;
+      opacity: 0;
+      transform: translateY(14px);
+      transition: opacity .35s ease, transform .35s ease;
+    }
+    #result.visible { display: block; }
+    #result.shown   { opacity: 1; transform: none; }
+
+    .result-top {
+      display: flex;
+      align-items: center;
+      gap: 1.4rem;
+      flex-wrap: wrap;
+    }
+    .glucose-value {
+      font-size: clamp(2.4rem, 7vw, 3.2rem);
+      font-weight: 700;
+      font-family: 'DM Mono', monospace;
+      letter-spacing: -.03em;
+      line-height: 1;
+    }
+    .glucose-unit {
+      font-family: 'DM Mono', monospace;
+      font-size: .95rem;
+      color: var(--muted);
+      margin-top: .25rem;
+    }
+
+    .status-badge {
+      padding: .4rem 1rem;
+      border-radius: 99px;
+      font-weight: 600;
+      font-size: .9rem;
+      border: 1px solid transparent;
+    }
+    .status-normal  { background: var(--ok-bg);     color: var(--ok);     border-color: var(--ok-border); }
+    .status-high    { background: var(--danger-bg);  color: var(--danger);  border-color: var(--danger-border); }
+    .status-low     { background: var(--warn-bg);   color: var(--warn);   border-color: var(--warn-border); }
+
+    /* ── Gauge bar ─────────────────────────────────────────────── */
+    .gauge-wrap { margin-top: 1.4rem; }
+    .gauge-labels {
+      display: flex; justify-content: space-between;
+      font-size: .78rem; color: var(--muted);
+      font-family: 'DM Mono', monospace;
+      margin-bottom: .35rem;
+    }
+    .gauge-track {
+      height: 10px;
+      border-radius: 99px;
+      background: linear-gradient(to right, var(--warn) 0%, var(--warn) 23.3%, var(--ok) 23.3%, var(--ok) 33%, orange 33%, orange 41.7%, var(--danger) 41.7%, var(--danger) 100%);      position: relative;
+      overflow: visible;
+    }
+    .gauge-marker {
+      position: absolute;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: var(--surface);
+      border: 3px solid var(--text);
+      box-shadow: var(--shadow);
+      transition: left .6s cubic-bezier(.34,1.56,.64,1);
+    }
+    .gauge-ref-line {
+      position: absolute;
+      top: -4px; bottom: -4px;
+      width: 2px;
+      background: rgba(0,0,0,.15);
+      border-radius: 1px;
+    }
+
+    /* ── Advice box ────────────────────────────────────────────── */
+    .advice-box {
+      margin-top: 1.2rem;
+      padding: 1rem 1.2rem;
+      border-radius: 10px;
+      font-size: .95rem;
+      line-height: 1.55;
+      border: 1px solid transparent;
+    }
+    .advice-normal { background: var(--ok-bg);    border-color: var(--ok-border); }
+    .advice-high   { background: var(--danger-bg); border-color: var(--danger-border); }
+    .advice-low    { background: var(--warn-bg);  border-color: var(--warn-border); }
+    .advice-box .advice-title {
+      font-weight: 700; margin-bottom: .3rem; font-size: 1rem;
+    }
+
+    /* ── Ref table ─────────────────────────────────────────────── */
+    .ref-table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+    .ref-table th {
+      text-align: left; padding: .55rem .8rem;
+      font-weight: 600; color: var(--muted);
+      border-bottom: 1px solid var(--border);
+      font-size: .8rem; text-transform: uppercase; letter-spacing: .04em;
+    }
+    .ref-table td { padding: .65rem .8rem; border-bottom: 1px solid var(--border); }
+    .ref-table tr:last-child td { border-bottom: none; }
+    .ref-dot {
+      display: inline-block;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      margin-right: .4rem;
+    }
+
+    /* ── Error ─────────────────────────────────────────────────── */
+    #error-box {
+      display: none;
+      background: var(--danger-bg);
+      border: 1px solid var(--danger-border);
+      color: var(--danger);
+      border-radius: 10px;
+      padding: .9rem 1.1rem;
+      font-size: .93rem;
+      margin-top: 1rem;
+    }
+
+    /* ── Disclaimer ────────────────────────────────────────────── */
+    .disclaimer {
+      font-size: .8rem;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.6;
+      padding: 0 1rem;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo-dot"></div>
+  <div class="logo-text"><span>Gluco</span>Scan</div>
+  <div class="header-sub">Analiza wyników laboratoryjnych</div>
+</header>
+
+<main>
+  <!-- Hero -->
+  <div class="hero">
+    <h1>Sprawdź poziom<br /><em>glukozy</em> z PDF-a</h1>
+    <p>Wgraj plik z wynikami badań krwi, a my automatycznie odczytamy wartość glukozy i ocenimy ją względem zakresu referencyjnego.</p>
+  </div>
+
+  <!-- Upload card -->
+  <div class="card">
+    <div class="card-header">
+      <div class="step">1</div>
+      <h2>Wybierz plik PDF z wynikami</h2>
+    </div>
+    <div class="card-body">
+      <div class="drop-zone" id="drop-zone">
+        <input type="file" id="pdf-input" accept=".pdf" />
+        <span class="drop-icon">📄</span>
+        <p><strong>Kliknij lub przeciągnij plik tutaj</strong></p>
+        <p>Obsługiwane: pliki .pdf z wynikami laboratoryjnymi</p>
+        <div id="file-name"></div>
+      </div>
+
+      <div id="error-box"></div>
+
+      <div class="btn-row">
+        <button class="btn" id="analyze-btn" disabled>
+          <div class="spinner"></div>
+          <span class="btn-text">Analizuj wyniki</span>
+        </button>
+        <span id="btn-hint" style="font-size:.85rem;color:var(--muted)">Najpierw wybierz plik</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Result card (hidden initially) -->
+  <div id="result">
+    <div class="card">
+      <div class="card-header">
+        <div class="step">2</div>
+        <h2>Wynik analizy</h2>
+      </div>
+      <div class="card-body">
+        <div class="result-top">
+          <div>
+            <div class="glucose-value" id="res-value">—</div>
+            <div class="glucose-unit" id="res-unit">mg/dL</div>
+          </div>
+          <span class="status-badge" id="res-badge">—</span>
+        </div>
+
+        <!-- Gauge -->
+<div class="gauge-labels" style="position:relative; height:1.2em;">
+  <span style="position:absolute; left:0">0</span>
+  <span id="gauge-label-low" style="position:absolute; transform:translateX(-50%)">70</span>
+  <span id="gauge-label-high" style="position:absolute; transform:translateX(-50%)">99</span>
+  <span style="position:absolute; right:0">300</span>
+</div>
+          <div class="gauge-track" id="gauge-track">
+            <div class="gauge-ref-line" id="gauge-ref-low"></div>
+            <div class="gauge-ref-line" id="gauge-ref-high"></div>
+            <div class="gauge-marker" id="gauge-marker"></div>
+          </div>
+        </div>
+
+        <!-- Advice -->
+        <div class="advice-box" id="advice-box">
+          <div class="advice-title" id="advice-title"></div>
+          <div id="advice-text"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reference table -->
+  <div class="card">
+    <div class="card-header">
+      <div class="step" style="background:var(--muted)">i</div>
+      <h2>Zakresy referencyjne – Glukoza (na czczo)</h2>
+    </div>
+    <div class="card-body">
+      <table class="ref-table">
+        <thead>
+          <tr>
+            <th>Stan</th>
+            <th>Wartość (mg/dL)</th>
+            <th>Interpretacja</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="ref-dot" style="background:var(--warn)"></span>Hipoglikemia</td>
+            <td>&lt; 70</td>
+            <td>Zbyt niski poziom cukru we krwi</td>
+          </tr>
+          <tr>
+            <td><span class="ref-dot" style="background:var(--ok)"></span>Norma</td>
+            <td>70 – 99</td>
+            <td>Prawidłowy poziom glukozy na czczo</td>
+          </tr>
+          <tr>
+            <td><span class="ref-dot" style="background:var(--warn)"></span>Stan przedcukrzycowy</td>
+            <td>100 – 125</td>
+            <td>Podwyższona glukoza – wymaga obserwacji</td>
+          </tr>
+          <tr>
+            <td><span class="ref-dot" style="background:var(--danger)"></span>Cukrzyca</td>
+            <td>≥ 126</td>
+            <td>Wartość wskazująca na cukrzycę</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <p class="disclaimer">
+    ⚠️ GlucoScan służy wyłącznie celom informacyjnym.<br />
+    Nie zastępuje porady lekarskiej. W razie wątpliwości skonsultuj się z lekarzem.
+  </p>
+</main>
+
+<script>
+  const pdfInput   = document.getElementById('pdf-input');
+  const dropZone   = document.getElementById('drop-zone');
+  const fileNameEl = document.getElementById('file-name');
+  const analyzeBtn = document.getElementById('analyze-btn');
+  const btnHint    = document.getElementById('btn-hint');
+  const errorBox   = document.getElementById('error-box');
+  const resultEl   = document.getElementById('result');
+  let hideTimer    = null;   // ← śledzi opóźnione ukrywanie
+
+  // ── Drag & drop ─────────────────────────────────────────────────
+  dropZone.addEventListener('dragover',  e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropZone.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file) setFile(file);
+  });
+
+  pdfInput.addEventListener('change', () => {
+    if (pdfInput.files[0]) setFile(pdfInput.files[0]);
+  });
+
+  function setFile(file) {
+    if (!file.name.toLowerCase().endsWith('.pdf')) {
+      showError('Proszę wybrać plik w formacie .pdf');
+      return;
+    }
+    hideError();
+    fileNameEl.textContent = '📎 ' + file.name;
+    analyzeBtn.disabled = false;
+    btnHint.textContent = '';
+    hideResult();
+    // Synchronize with the hidden input if dragged
+    const dt = new DataTransfer();
+    dt.items.add(file);
+    pdfInput.files = dt.files;
+  }
+
+  // ── Analyze ──────────────────────────────────────────────────────
+  analyzeBtn.addEventListener('click', async () => {
+    const file = pdfInput.files[0];
+    if (!file) return;
+
+    setLoading(true);
+    hideError();
+    hideResult();
+
+    const formData = new FormData();
+    formData.append('pdf', file);
+
+    try {
+      const resp = await fetch('/analyze', { method: 'POST', body: formData });
+      const data = await resp.json();
+
+      if (!resp.ok || data.error) {
+        showError(data.error || 'Nieznany błąd serwera.');
+      } else {
+        renderResult(data);
+      }
+    } catch (err) {
+      showError('Nie udało się połączyć z serwerem. Sprawdź czy aplikacja działa.');
+    } finally {
+      setLoading(false);
+    }
+  });
+
+  // ── Render result ────────────────────────────────────────────────
+  function renderResult(data) {
+    const { value, unit, status, label, advice, ref_low, ref_high } = data;
+
+    document.getElementById('res-value').textContent = value;
+    document.getElementById('res-unit').textContent  = unit;
+
+    const badge = document.getElementById('res-badge');
+    badge.textContent = label;
+    badge.className = 'status-badge status-' + status;
+
+    // Gauge (range 0–300 mg/dL visual)
+    const VISUAL_MAX = 300;
+    const pct = v => Math.min(100, Math.max(0, (v / VISUAL_MAX) * 100));
+
+    document.getElementById('gauge-label-low').style.left  = pct(ref_low)  + '%';
+    document.getElementById('gauge-label-high').style.left = pct(ref_high) + '%';
+
+    const valueMgdl = data.value_mgdl || value;
+    setTimeout(() => {
+      document.getElementById('gauge-marker').style.left = pct(valueMgdl) + '%';
+    }, 80);
+
+    document.getElementById('gauge-label-low').textContent  = ref_low;
+    document.getElementById('gauge-label-high').textContent = ref_high;
+
+    // Advice
+    const adviceBox   = document.getElementById('advice-box');
+    adviceBox.className = 'advice-box advice-' + status;
+    document.getElementById('advice-title').textContent = label;
+    document.getElementById('advice-text').textContent  = advice;
+
+    // Anuluj ewentualny timer ukrywania i pokaż wynik
+    if (hideTimer) { clearTimeout(hideTimer); hideTimer = null; }
+    resultEl.style.display = 'block';
+    requestAnimationFrame(() => {
+      resultEl.classList.add('visible');
+      requestAnimationFrame(() => resultEl.classList.add('shown'));
+    });
+    resultEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function hideResult() {
+    if (hideTimer) { clearTimeout(hideTimer); hideTimer = null; }
+    resultEl.classList.remove('shown');
+    hideTimer = setTimeout(() => {
+      resultEl.classList.remove('visible');
+      resultEl.style.display = 'none';
+      hideTimer = null;
+    }, 350);
+  }
+
+  function showError(msg) {
+    errorBox.textContent = '⚠️ ' + msg;
+    errorBox.style.display = 'block';
+  }
+  function hideError() { errorBox.style.display = 'none'; }
+
+  function setLoading(on) {
+    analyzeBtn.classList.toggle('loading', on);
+    analyzeBtn.disabled = on;
+  }
+</script>
+
+</body>
+</html>

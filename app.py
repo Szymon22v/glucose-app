@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify, render_template
-from logic import extract_text_from_pdf, find_glucose, evaluate, save_glucose_report_html
+from logic import extract_text_from_pdf, find_glucose, evaluate, save_glucose_report_html, save_output_json
 
 app = Flask(__name__)
 
@@ -37,7 +37,10 @@ def analyze():
         result = evaluate(value, unit)
         # DODANE
         report_path = save_glucose_report_html(result, source_name=file.filename)
+        json_path = save_output_json(result, source_name=file.filename)
+
         result["report_path"] = report_path
+        result["json_path"] = json_path
 
         return jsonify(result)
 

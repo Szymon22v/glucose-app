@@ -4,6 +4,7 @@ import io
 from pathlib import Path
 from datetime import datetime
 import html
+import json
 
 # ─── Stałe referencyjne ───────────────────────────────────────────────────────
 GLUCOSE_REF_LOW  = 70    # mg/dL
@@ -251,5 +252,32 @@ def save_glucose_report_html(result: dict, source_name: str = "input.pdf", outpu
 
     html_content = build_glucose_report_html(result, source_name=source_name)
     output_path.write_text(html_content, encoding="utf-8")
+
+    return str(output_path)
+
+
+def save_output_json(result: dict, source_name: str = "input.pdf", output_dir: str = "outputs") -> str:
+    Path(output_dir).mkdir(parents=True, exist_ok=True)
+
+    safe_name = Path(source_name).stem.replace(" ", "_")
+    output_path = Path(output_dir) / f"{safe_name}_output.json"
+
+    output_data = {
+        "source_file": source_name,
+        "test": "GLU",
+        "value": result.get("value"),
+        "unit": result.get("unit"),
+        "value_mgdl": result.get("value_mgdl"),
+        "status": result.get("status"),
+        "label": result.get("label"),
+        "advice": result.get("advice"),
+        "ref_low": result.get("ref_low"),
+        "ref_high": result.get("ref_high"),
+    }
+
+    output_path.write_text(
+        json.dumps(output_data, ensure_ascii=False, indent=2),
+        encoding="utf-8"
+    )
 
     return str(output_path)

@@ -1,0 +1,12 @@
+{
+  "resourceType": "wynikibadan.json",
+  "result": [
+    {
+      "code": "GLU",
+      "value": 168,
+      "unit": "mg/dL",
+      "refLow": 70,
+      "refHigh": 99
+    }
+  ]
+}

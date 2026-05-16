@@ -6,7 +6,7 @@ from datetime import datetime
 import html
 import json
 
-import fitz  # PyMuPDF
+import fitz  
 import easyocr
 import numpy as np
 from PIL import Image, ImageOps, ImageEnhance, ImageFilter
@@ -222,17 +222,60 @@ def evaluate(value: float, unit: str) -> dict:
     """
     Evaluates glucose value against the reference range.
     The comparison is performed in mg/dL.
+
+    The function assigns the H/L/N flag:
+    - L: below reference range
+    - N: within reference range
+    - H: above reference range
+
+    It also returns validation_errors, which contains detected
+    problems related to the extracted value, unit or reference range.
     """
+    validation_errors = []
+
     low = GLUCOSE_REF_LOW
     high = GLUCOSE_REF_HIGH
 
+    # Validate value
+    try:
+        value = float(value)
+    except (TypeError, ValueError):
+        validation_errors.append("Nieprawidłowa lub nieodczytana wartość glukozy.")
+        value = 0.0
+
+    # Validate and normalize unit
+    if unit is None or str(unit).strip() == "":
+        validation_errors.append("Nie odczytano jednostki wyniku, przyjęto domyślnie mg/dL.")
+        unit = "mg/dL"
+
+    unit_clean = str(unit).strip().lower().replace(" ", "")
+
+    if unit_clean in ["mg/dl", "mg/dl."]:
+        unit = "mg/dL"
+    elif unit_clean in ["mmol/l", "mmol/l."]:
+        unit = "mmol/L"
+    else:
+        validation_errors.append(
+            f"Nieobsługiwana jednostka wyniku: {unit}. Przyjęto domyślnie mg/dL."
+        )
+        unit = "mg/dL"
+
+    # Convert to mg/dL for comparison
     if unit == "mmol/L":
         value_mgdl = value * 18.018
     else:
         value_mgdl = value
 
+    # Validate realistic range
+    if value_mgdl < 20 or value_mgdl > 600:
+        validation_errors.append(
+            "Odczytana wartość glukozy znajduje się poza typowym zakresem kontrolnym 20–600 mg/dL."
+        )
+
+    # Evaluate result
     if value_mgdl < low:
         status = "low"
+        flag = "L"
         label = "Za niska"
         advice = (
             "Twój poziom glukozy jest poniżej normy (hipoglikemia). "
@@ -240,6 +283,7 @@ def evaluate(value: float, unit: str) -> dict:
         )
     elif value_mgdl > high:
         status = "high"
+        flag = "H"
         label = "Za wysoka"
         advice = (
             "Twój poziom glukozy jest powyżej normy. "
@@ -248,18 +292,21 @@ def evaluate(value: float, unit: str) -> dict:
         )
     else:
         status = "normal"
+        flag = "N"
         label = "W normie"
         advice = "Twój poziom glukozy jest prawidłowy. Tak trzymaj!"
 
     return {
-        "value": value,
+        "value": round(value, 2),
         "value_mgdl": round(value_mgdl, 1),
         "unit": unit,
         "status": status,
+        "flag": flag,
         "label": label,
         "advice": advice,
         "ref_low": low,
         "ref_high": high,
+        "validation_errors": validation_errors,
     }
 
 
@@ -267,10 +314,18 @@ def build_glucose_report_html(result: dict, source_name: str = "input.pdf") -> s
     value = html.escape(str(result.get("value", "")))
     unit = html.escape(str(result.get("unit", "")))
     label = html.escape(str(result.get("label", "")))
+    flag = html.escape(str(result.get("flag", "")))
     advice = html.escape(str(result.get("advice", "")))
     status = result.get("status", "normal")
     ref_low = html.escape(str(result.get("ref_low", "")))
     ref_high = html.escape(str(result.get("ref_high", "")))
+    validation_errors = result.get("validation_errors", [])
+    if validation_errors:
+        validation_errors_html = "<ul>" + "".join(
+            f"<li>{html.escape(str(error))}</li>" for error in validation_errors
+        ) + "</ul>"
+    else:
+        validation_errors_html = "<p>Brak błędów walidacji.</p>"
     generated_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     source_name = html.escape(source_name)
 
@@ -362,6 +417,17 @@ def build_glucose_report_html(result: dict, source_name: str = "input.pdf") -> s
       border-radius: 12px;
       padding: 16px;
     }}
+    .validation {{
+        background: #f9fafb;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 16px;
+        margin-top: 16px;
+    }}
+    .validation ul {{
+        margin: 8px 0 0 20px;
+        padding: 0;
+    }}
     .footer {{
       padding: 20px 28px;
       border-top: 1px solid #e5e7eb;
@@ -381,7 +447,7 @@ def build_glucose_report_html(result: dict, source_name: str = "input.pdf") -> s
     <div class="content">
       <div class="value">{value}</div>
       <div class="unit">{unit}</div>
-      <div class="badge">{label}</div>
+      <div class="badge">Flaga: {flag} — {label}</div>
 
       <table>
         <thead>
@@ -390,6 +456,7 @@ def build_glucose_report_html(result: dict, source_name: str = "input.pdf") -> s
             <th>Wynik</th>
             <th>Jednostka</th>
             <th>Zakres referencyjny</th>
+            <th>Flaga</th>
             <th>Status</th>
           </tr>
         </thead>
@@ -399,6 +466,7 @@ def build_glucose_report_html(result: dict, source_name: str = "input.pdf") -> s
             <td>{value}</td>
             <td>{unit}</td>
             <td>{ref_low} - {ref_high}</td>
+            <td>{flag}</td>
             <td>{label}</td>
           </tr>
         </tbody>
@@ -407,6 +475,10 @@ def build_glucose_report_html(result: dict, source_name: str = "input.pdf") -> s
       <div class="advice">
         <strong>Interpretacja:</strong><br>
         {advice}
+      </div>
+      <div class="validation">
+        <strong>Walidacja danych:</strong>
+        {validation_errors_html}
       </div>
     </div>
 
@@ -452,10 +524,12 @@ def save_output_json(
         "unit": result.get("unit"),
         "value_mgdl": result.get("value_mgdl"),
         "status": result.get("status"),
+        "flag": result.get("flag"),
         "label": result.get("label"),
         "advice": result.get("advice"),
         "ref_low": result.get("ref_low"),
         "ref_high": result.get("ref_high"),
+        "validation_errors": result.get("validation_errors", []),
     }
 
     output_path.write_text(

@@ -195,27 +195,164 @@ def extract_text_from_file(file_bytes: bytes, filename: str) -> str:
 def find_glucose(text: str):
     """
     Searches for glucose value and unit in extracted text.
-    The function looks for a line containing 'glukoza' or 'glucose'.
+
+    If several glucose-related results are found, the function chooses
+    the most relevant basic glucose result.
+
+    Priority:
+    1. Glukoza w surowicy/osoczu (GLU)
+    2. Glukoza na czczo / fasting glucose
+    3. General glucose / GLU
+    4. OGTT / after 120 min only if no better result is found
     """
-    normalized = re.sub(r"[ \t]+", " ", text)
+    if not text:
+        return None, None
 
-    for line in normalized.splitlines():
-        line_lower = line.lower()
+    normalized = text.replace("\t", " ")
+    normalized = re.sub(r"[ ]{2,}", " ", normalized)
 
-        if "glukoza" not in line_lower and "glucose" not in line_lower:
+    lines = [line.strip() for line in normalized.splitlines() if line.strip()]
+
+    glucose_keywords_pattern = r"\b(glukoza|glucose|glu|glc)\b"
+    unit_pattern = r"(mg\s*/?\s*d[l1i]|mgdl|mmol\s*/?\s*l)"
+
+    def detect_unit(fragment):
+        fragment_lower = fragment.lower().replace(" ", "")
+
+        if "mmol/l" in fragment_lower or "mmoll" in fragment_lower:
+            return "mmol/L"
+
+        if "mg/dl" in fragment_lower or "mgdl" in fragment_lower:
+            return "mg/dL"
+
+        return "mg/dL"
+
+    def is_valid_value(value, unit):
+        if unit == "mmol/L":
+            return 1 <= value <= 35
+
+        return 20 <= value <= 600
+
+    def parse_number(number_text):
+        return float(number_text.replace(",", "."))
+
+    def glucose_priority(fragment):
+        """
+        Assigns priority to glucose-related results.
+        Higher score means more relevant result.
+        """
+        fragment_lower = fragment.lower()
+
+        if "ogtt" in fragment_lower or "120" in fragment_lower or "po 120" in fragment_lower:
+            return 10
+
+        if "surowicy" in fragment_lower or "osoczu" in fragment_lower or "(glu)" in fragment_lower:
+            return 100
+
+        if "na czczo" in fragment_lower or "fasting" in fragment_lower:
+            return 90
+
+        if "glukoza" in fragment_lower or "glucose" in fragment_lower or "glu" in fragment_lower:
+            return 70
+
+        return 0
+
+    def extract_from_fragment(fragment):
+        fragment_lower = fragment.lower()
+
+        keyword_match = re.search(glucose_keywords_pattern, fragment_lower)
+
+        if not keyword_match:
+            return None
+
+        searchable = fragment[keyword_match.start(): keyword_match.start() + 160]
+        searchable_lower = searchable.lower()
+
+        value_unit_match = re.search(
+            rf"(\d{{1,3}}(?:[.,]\d+)?)\s*{unit_pattern}",
+            searchable_lower
+        )
+
+        if value_unit_match:
+            value = parse_number(value_unit_match.group(1))
+            unit_raw = value_unit_match.group(2)
+            unit = "mmol/L" if "mmol" in unit_raw else "mg/dL"
+
+            if is_valid_value(value, unit):
+                return {
+                    "value": value,
+                    "unit": unit,
+                    "priority": glucose_priority(fragment),
+                    "line": fragment,
+                }
+
+        unit_value_match = re.search(
+            rf"{unit_pattern}\s*(\d{{1,3}}(?:[.,]\d+)?)",
+            searchable_lower
+        )
+
+        if unit_value_match:
+            unit_raw = unit_value_match.group(1)
+            value = parse_number(unit_value_match.group(2))
+            unit = "mmol/L" if "mmol" in unit_raw else "mg/dL"
+
+            if is_valid_value(value, unit):
+                return {
+                    "value": value,
+                    "unit": unit,
+                    "priority": glucose_priority(fragment),
+                    "line": fragment,
+                }
+
+        unit = detect_unit(searchable)
+
+        for match in re.finditer(r"\b(\d{1,3}(?:[.,]\d+)?)\b", searchable):
+            number_text = match.group(1)
+
+            previous_char = searchable[match.start() - 1] if match.start() > 0 else ""
+            next_char = searchable[match.end()] if match.end() < len(searchable) else ""
+
+            if previous_char in "-–—" or next_char in "-–—":
+                continue
+
+            value = parse_number(number_text)
+
+            if is_valid_value(value, unit):
+                return {
+                    "value": value,
+                    "unit": unit,
+                    "priority": glucose_priority(fragment),
+                    "line": fragment,
+                }
+
+        return None
+
+    candidates = []
+
+    for i, line in enumerate(lines):
+        context = " ".join(lines[i:i + 3])
+
+        if not re.search(glucose_keywords_pattern, context.lower()):
             continue
 
-        numbers = re.findall(r"\b(\d{1,3}(?:[.,]\d+)?)\b", line)
+        candidate = extract_from_fragment(context)
 
-        if numbers:
-            value_str = numbers[0].replace(",", ".")
-            value = float(value_str)
+        if candidate is not None:
+            candidates.append(candidate)
 
-            if 20 <= value <= 600:
-                unit = "mmol/L" if "mmol" in line_lower else "mg/dL"
-                return value, unit
+    if not candidates:
+        candidate = extract_from_fragment(normalized)
 
-    return None, None
+        if candidate is not None:
+            candidates.append(candidate)
+
+    if not candidates:
+        return None, None
+
+    candidates.sort(key=lambda item: item["priority"], reverse=True)
+    best = candidates[0]
+
+    return best["value"], best["unit"]
 
 
 def evaluate(value: float, unit: str) -> dict:

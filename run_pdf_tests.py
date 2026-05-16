@@ -86,6 +86,10 @@ def main():
             output_dir="reports/pdf"
         )
 
+        value, unit, ref_low, ref_high= find_glucose(text)
+        result = evaluate(value, unit, ref_low, ref_high)
+
+
         predicted_flag = result.get("flag")
         is_correct = expected_flag == predicted_flag if expected_flag else None
 

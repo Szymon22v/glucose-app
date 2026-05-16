@@ -199,7 +199,10 @@ def extract_reference_range(fragment: str):
     3,9 - 6,1
     70–99
     """
-    range_match = re.search(r"(\d{1,3}(?:[.,]\d+)?)\s*[-–—_]\s*(\d{1,3}(?:[.,]\d+)?)", fragment)
+    range_match = re.search(
+        r"(\d{1,3}(?:[.,]\d+)?)\s*[-–—_=]\s*(\d{1,3}(?:[.,]\d+)?)",
+        fragment
+    )
     if not range_match:
         return None, None
 
@@ -343,7 +346,10 @@ def find_glucose(text: str):
             unit_raw = value_unit_match.group(2)
             unit = normalize_unit(unit_raw)
 
+
             if is_valid_value(value, unit):
+
+                ref_low, ref_high = extract_reference_range(searchable)
                 return {
                     "value": value,
                     "unit": unit,
@@ -364,6 +370,8 @@ def find_glucose(text: str):
             unit = normalize_unit(unit_raw)
 
             if is_valid_value(value, unit):
+
+                ref_low, ref_high = extract_reference_range(searchable)
                 return {
                     "value": value,
                     "unit": unit,
@@ -380,6 +388,7 @@ def find_glucose(text: str):
             value = parse_number(number_text)
 
             if is_valid_value(value, unit):
+                ref_low, ref_high = extract_reference_range(searchable)
                 return {
                     "value": value,
                     "unit": unit,
@@ -415,6 +424,7 @@ def find_glucose(text: str):
 
     candidates.sort(key=lambda item: item["priority"], reverse=True)
     best = candidates[0]
+
 
     return best["value"], best["unit"], best["ref_low"], best["ref_high"]
 

@@ -1,0 +1,14 @@
+{
+  "source_file": "pacjent_09_troche_powyzej_normy_hematologia_biochemia_z_zakresami_referencyjnymi.pdf",
+  "test": "GLU",
+  "value": 112.0,
+  "unit": "mg/dL",
+  "value_mgdl": 112.0,
+  "status": "high",
+  "flag": "H",
+  "label": "Za wysoka",
+  "advice": "Twój poziom glukozy jest powyżej normy. Może to wskazywać na stan przedcukrzycowy lub cukrzycę. Skonsultuj się z lekarzem.",
+  "ref_low": 70.0,
+  "ref_high": 99.0,
+  "validation_errors": []
+}

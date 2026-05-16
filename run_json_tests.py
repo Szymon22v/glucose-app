@@ -92,7 +92,12 @@ def main():
     print(f"Correct predictions: {correct}/{total}")
     print(f"Accuracy: {accuracy:.2f}%")
 
+
     SUMMARY_PATH.parent.mkdir(parents=True, exist_ok=True)
+
+    output_path = Path("outputs/summaries/json_test_summary.json")
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
 
     output_data = {
         "test_set": "json",

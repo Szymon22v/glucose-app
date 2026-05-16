@@ -1,0 +1,14 @@
+{
+  "source_file": "pacjent_02_glukoza_troche_ponizej_normy.pdf",
+  "test": "GLU",
+  "value": 67.0,
+  "unit": "mg/dL",
+  "value_mgdl": 67.0,
+  "status": "low",
+  "flag": "L",
+  "label": "Za niska",
+  "advice": "Twój poziom glukozy jest poniżej normy (hipoglikemia). Skonsultuj się z lekarzem.",
+  "ref_low": 70,
+  "ref_high": 99,
+  "validation_errors": []
+}

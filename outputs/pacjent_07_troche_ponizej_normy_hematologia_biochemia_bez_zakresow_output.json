@@ -1,0 +1,14 @@
+{
+  "source_file": "pacjent_07_troche_ponizej_normy_hematologia_biochemia_bez_zakresow.pdf",
+  "test": "GLU",
+  "value": 68.0,
+  "unit": "mg/dL",
+  "value_mgdl": 68.0,
+  "status": "low",
+  "flag": "L",
+  "label": "Za niska",
+  "advice": "Twój poziom glukozy jest poniżej normy (hipoglikemia). Skonsultuj się z lekarzem.",
+  "ref_low": 70,
+  "ref_high": 99,
+  "validation_errors": []
+}

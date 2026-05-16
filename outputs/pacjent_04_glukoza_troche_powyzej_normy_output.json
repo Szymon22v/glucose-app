@@ -1,0 +1,14 @@
+{
+  "source_file": "pacjent_04_glukoza_troche_powyzej_normy.pdf",
+  "test": "GLU",
+  "value": 108.0,
+  "unit": "mg/dL",
+  "value_mgdl": 108.0,
+  "status": "high",
+  "flag": "H",
+  "label": "Za wysoka",
+  "advice": "Twój poziom glukozy jest powyżej normy. Może to wskazywać na stan przedcukrzycowy lub cukrzycę. Skonsultuj się z lekarzem.",
+  "ref_low": 70,
+  "ref_high": 99,
+  "validation_errors": []
+}

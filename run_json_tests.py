@@ -2,10 +2,11 @@ import json
 from pathlib import Path
 
 from json_runner import load_input_json, extract_glucose_from_json
-from logic import evaluate
+from logic import evaluate, save_glucose_report_html
 
 
 TEST_DIR = Path("test_inputs/json")
+SUMMARY_PATH = Path("outputs/summaries/json_test_summary.json")
 
 
 def get_expected_flag(data):
@@ -34,11 +35,16 @@ def main():
 
         expected_flag = get_expected_flag(data)
 
-        value, unit = extract_glucose_from_json(data)
-        result = evaluate(value, unit)
+        value, unit, ref_low, ref_high = extract_glucose_from_json(data)
+        result = evaluate(value, unit, ref_low, ref_high)
+
+        report_path = save_glucose_report_html(
+            result,
+            source_name=json_file.name,
+            output_dir="reports/json"
+        )
 
         predicted_flag = result.get("flag")
-
         is_correct = expected_flag == predicted_flag
 
         total += 1
@@ -52,15 +58,24 @@ def main():
             "value_mgdl": result.get("value_mgdl"),
             "expected_flag": expected_flag,
             "predicted_flag": predicted_flag,
-            "correct": is_correct
+            "correct": is_correct,
+            "report_path": str(report_path)
         })
 
     accuracy = correct / total * 100
 
     print("\nJSON TEST RESULTS")
-    print("-" * 90)
-    print(f"{'File':30} {'Value':>8} {'Unit':>8} {'Expected':>10} {'Predicted':>10} {'Correct':>10}")
-    print("-" * 90)
+    print("-" * 110)
+    print(
+        f"{'File':30} "
+        f"{'Value':>8} "
+        f"{'Unit':>8} "
+        f"{'Expected':>10} "
+        f"{'Predicted':>10} "
+        f"{'Correct':>10} "
+        f"{'Report':>20}"
+    )
+    print("-" * 110)
 
     for row in rows:
         print(
@@ -69,29 +84,30 @@ def main():
             f"{row['unit']:>8} "
             f"{row['expected_flag']:>10} "
             f"{row['predicted_flag']:>10} "
-            f"{str(row['correct']):>10}"
+            f"{str(row['correct']):>10} "
+            f"{row['report_path']:>20}"
         )
 
-    print("-" * 90)
+    print("-" * 110)
     print(f"Correct predictions: {correct}/{total}")
     print(f"Accuracy: {accuracy:.2f}%")
 
-    output_path = Path("outputs/json_test_summary.json")
-    output_path.parent.mkdir(parents=True, exist_ok=True)
+    SUMMARY_PATH.parent.mkdir(parents=True, exist_ok=True)
 
     output_data = {
+        "test_set": "json",
         "total_tests": total,
         "correct_predictions": correct,
         "accuracy_percent": round(accuracy, 2),
         "results": rows
     }
 
-    output_path.write_text(
+    SUMMARY_PATH.write_text(
         json.dumps(output_data, ensure_ascii=False, indent=2),
         encoding="utf-8"
     )
 
-    print(f"\nTest summary saved to: {output_path}")
+    print(f"\nTest summary saved to: {SUMMARY_PATH}")
 
 
 if __name__ == "__main__":

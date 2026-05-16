@@ -529,8 +529,23 @@
   function renderResult(data) {
     const { value, unit, status, label, advice, ref_low, ref_high } = data;
 
-    document.getElementById('res-value').textContent = value;
-    document.getElementById('res-unit').textContent  = unit;
+    const resValue = document.getElementById('res-value');
+    const resUnit = document.getElementById('res-unit');
+    
+    if (unit === 'mmol/L' && data.value_mgdl) {
+      const converted = Number(data.value_mgdl).toFixed(1);
+      
+      resValue.textContent = `${value} ${unit} ≈ ${converted} mg/dL`;
+      resValue.style.fontSize = '2rem';
+      resValue.style.lineHeight = '1.2';
+      resUnit.textContent = '';
+    } else {
+      resValue.textContent = value;
+      resValue.style.fontSize = '';
+      resValue.style.lineHeight = '';
+      
+      resUnit.textContent = unit;
+    }
 
     const badge = document.getElementById('res-badge');
     badge.textContent = label;

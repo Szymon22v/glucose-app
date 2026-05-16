@@ -34,11 +34,13 @@ def extract_glucose_from_json(data: dict):
         if code == "GLU":
             value = item.get("value")
             unit = item.get("unit", "mg/dL")
+            ref_low = item.get("refLow")
+            ref_high = item.get("refHigh")
 
             if value is None:
                 raise ValueError('Rekord GLU nie zawiera pola "value".')
 
-            return float(value), unit
+            return float(value), unit, ref_low, ref_high
 
     raise ValueError('Nie znaleziono badania o kodzie "GLU" w polu result.')
 
@@ -52,9 +54,9 @@ def main():
 
     try:
         data = load_input_json(input_path)
-        value, unit = extract_glucose_from_json(data)
+        value, unit, ref_low, ref_high = extract_glucose_from_json(data)
 
-        result = evaluate(value, unit)
+        result = evaluate(value, unit, ref_low, ref_high)
 
         report_path = save_glucose_report_html(
             result,

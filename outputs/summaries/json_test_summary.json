@@ -1,0 +1,108 @@
+{
+  "test_set": "json",
+  "total_tests": 10,
+  "correct_predictions": 10,
+  "accuracy_percent": 100.0,
+  "results": [
+    {
+      "file": "glu_border_high.json",
+      "value": 99.0,
+      "unit": "mg/dL",
+      "value_mgdl": 99.0,
+      "expected_flag": "N",
+      "predicted_flag": "N",
+      "correct": true,
+      "report_path": "reports\\json\\glu_border_high_report.html"
+    },
+    {
+      "file": "glu_border_low.json",
+      "value": 70.0,
+      "unit": "mg/dL",
+      "value_mgdl": 70.0,
+      "expected_flag": "N",
+      "predicted_flag": "N",
+      "correct": true,
+      "report_path": "reports\\json\\glu_border_low_report.html"
+    },
+    {
+      "file": "glu_fasting_normal.json",
+      "value": 85.0,
+      "unit": "mg/dL",
+      "value_mgdl": 85.0,
+      "expected_flag": "N",
+      "predicted_flag": "N",
+      "correct": true,
+      "report_path": "reports\\json\\glu_fasting_normal_report.html"
+    },
+    {
+      "file": "glu_high.json",
+      "value": 168.0,
+      "unit": "mg/dL",
+      "value_mgdl": 168.0,
+      "expected_flag": "H",
+      "predicted_flag": "H",
+      "correct": true,
+      "report_path": "reports\\json\\glu_high_report.html"
+    },
+    {
+      "file": "glu_low.json",
+      "value": 63.0,
+      "unit": "mg/dL",
+      "value_mgdl": 63.0,
+      "expected_flag": "L",
+      "predicted_flag": "L",
+      "correct": true,
+      "report_path": "reports\\json\\glu_low_report.html"
+    },
+    {
+      "file": "glu_mmol_high.json",
+      "value": 7.2,
+      "unit": "mmol/L",
+      "value_mgdl": 129.7,
+      "expected_flag": "H",
+      "predicted_flag": "H",
+      "correct": true,
+      "report_path": "reports\\json\\glu_mmol_high_report.html"
+    },
+    {
+      "file": "glu_mmol_normal.json",
+      "value": 5.1,
+      "unit": "mmol/L",
+      "value_mgdl": 91.9,
+      "expected_flag": "N",
+      "predicted_flag": "N",
+      "correct": true,
+      "report_path": "reports\\json\\glu_mmol_normal_report.html"
+    },
+    {
+      "file": "glu_normal.json",
+      "value": 91.0,
+      "unit": "mg/dL",
+      "value_mgdl": 91.0,
+      "expected_flag": "N",
+      "predicted_flag": "N",
+      "correct": true,
+      "report_path": "reports\\json\\glu_normal_report.html"
+    },
+    {
+      "file": "glu_very_high.json",
+      "value": 265.0,
+      "unit": "mg/dL",
+      "value_mgdl": 265.0,
+      "expected_flag": "H",
+      "predicted_flag": "H",
+      "correct": true,
+      "report_path": "reports\\json\\glu_very_high_report.html"
+    },
+    {
+      "file": "glu_very_low.json",
+      "value": 45.0,
+      "unit": "mg/dL",
+      "value_mgdl": 45.0,
+      "expected_flag": "L",
+      "predicted_flag": "L",
+      "correct": true,
+      "report_path": "reports\\json\\glu_very_low_report.html"
+    }
+  ]
+}

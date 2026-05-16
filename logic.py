@@ -191,22 +191,35 @@ def extract_text_from_file(file_bytes: bytes, filename: str) -> str:
 
     raise ValueError("Nieobsługiwany format pliku. Wgraj PDF, PNG, JPG lub JPEG.")
 
+def extract_reference_range(fragment: str):
+    """
+    Tries to extract reference range from text fragment.
+    Supported examples:
+    70 - 99
+    3,9 - 6,1
+    70–99
+    """
+    range_match = re.search(r"(\d{1,3}(?:[.,]\d+)?)\s*[-–—_]\s*(\d{1,3}(?:[.,]\d+)?)", fragment)
+    if not range_match:
+        return None, None
+
+    ref_low = float(range_match.group(1).replace(",", "."))
+    ref_high = float(range_match.group(2).replace(",", "."))
+
+    return ref_low, ref_high
 
 def find_glucose(text: str):
     """
-    Searches for glucose value and unit in extracted text.
+    Searches for glucose value, unit and reference range in extracted text.
 
-    If several glucose-related results are found, the function chooses
-    the most relevant basic glucose result.
-
-    Priority:
-    1. Glukoza w surowicy/osoczu (GLU)
-    2. Glukoza na czczo / fasting glucose
-    3. General glucose / GLU
-    4. OGTT / after 120 min only if no better result is found
+    Returns:
+    - value
+    - unit
+    - ref_low
+    - ref_high
     """
     if not text:
-        return None, None
+        return None, None, None, None
 
     normalized = text.replace("\t", " ")
     normalized = re.sub(r"[ ]{2,}", " ", normalized)
@@ -214,7 +227,19 @@ def find_glucose(text: str):
     lines = [line.strip() for line in normalized.splitlines() if line.strip()]
 
     glucose_keywords_pattern = r"\b(glukoza|glucose|glu|glc)\b"
-    unit_pattern = r"(mg\s*/?\s*d[l1i]|mgdl|mmol\s*/?\s*l)"
+    unit_pattern = r"(mg\s*/?\s*d[l1i]|mgdl|mgldl|mg\s*l\s*d[l1i]|mmol\s*/?\s*l|mmoll|mmolll)"
+
+    def parse_number(number_text):
+        return float(number_text.replace(",", "."))
+
+    def normalize_unit(unit_raw):
+        unit_clean = unit_raw.lower().replace(" ", "")
+        unit_clean = unit_clean.replace("mgldl", "mg/dl")
+
+        if "mmol" in unit_clean:
+            return "mmol/L"
+
+        return "mg/dL"
 
     def detect_unit(fragment):
         fragment_lower = fragment.lower().replace(" ", "")
@@ -222,7 +247,12 @@ def find_glucose(text: str):
         if "mmol/l" in fragment_lower or "mmoll" in fragment_lower:
             return "mmol/L"
 
-        if "mg/dl" in fragment_lower or "mgdl" in fragment_lower:
+        if (
+            "mg/dl" in fragment_lower
+            or "mgdl" in fragment_lower
+            or "mgldl" in fragment_lower
+            or "mg/d1" in fragment_lower
+        ):
             return "mg/dL"
 
         return "mg/dL"
@@ -233,14 +263,41 @@ def find_glucose(text: str):
 
         return 20 <= value <= 600
 
-    def parse_number(number_text):
-        return float(number_text.replace(",", "."))
+    def extract_reference_range(fragment):
+        """
+        Extracts reference range like:
+        70 - 99
+        70–99
+        70 — 99
+        3.9 - 5.5
+        3,9 - 5,5
+        """
+        range_match = re.search(
+            r"(\d{1,3}(?:[.,]\d+)?)\s*[-–—_=]\s*(\d{1,3}(?:[.,]\d+)?)",
+            fragment
+        )
+
+        if range_match:
+            ref_low = parse_number(range_match.group(1))
+            ref_high = parse_number(range_match.group(2))
+
+            if ref_low < ref_high:
+                return ref_low, ref_high
+
+        return None, None
+
+    def remove_reference_ranges(fragment):
+        """
+        Removes reference ranges before looking for the actual glucose value.
+        This prevents 70 from 70-99 from being detected as the result.
+        """
+        return re.sub(
+            r"\b\d{1,3}(?:[.,]\d+)?\s*[-–—_=]\s*\d{1,3}(?:[.,]\d+)?\b",
+            " ",
+            fragment
+        )
 
     def glucose_priority(fragment):
-        """
-        Assigns priority to glucose-related results.
-        Higher score means more relevant result.
-        """
         fragment_lower = fragment.lower()
 
         if "ogtt" in fragment_lower or "120" in fragment_lower or "po 120" in fragment_lower:
@@ -265,62 +322,69 @@ def find_glucose(text: str):
         if not keyword_match:
             return None
 
-        searchable = fragment[keyword_match.start(): keyword_match.start() + 160]
-        searchable_lower = searchable.lower()
+        start = max(0, keyword_match.start() - 120)
+        end = min(len(fragment), keyword_match.end() + 260)
+        searchable = fragment[start:end]
+
+        ref_low, ref_high = extract_reference_range(searchable)
+
+
+        searchable_without_ranges = remove_reference_ranges(searchable)
+        searchable_without_ranges_lower = searchable_without_ranges.lower()
+
 
         value_unit_match = re.search(
             rf"(\d{{1,3}}(?:[.,]\d+)?)\s*{unit_pattern}",
-            searchable_lower
+            searchable_without_ranges_lower
         )
 
         if value_unit_match:
             value = parse_number(value_unit_match.group(1))
             unit_raw = value_unit_match.group(2)
-            unit = "mmol/L" if "mmol" in unit_raw else "mg/dL"
+            unit = normalize_unit(unit_raw)
 
             if is_valid_value(value, unit):
                 return {
                     "value": value,
                     "unit": unit,
+                    "ref_low": ref_low,
+                    "ref_high": ref_high,
                     "priority": glucose_priority(fragment),
                     "line": fragment,
                 }
 
         unit_value_match = re.search(
             rf"{unit_pattern}\s*(\d{{1,3}}(?:[.,]\d+)?)",
-            searchable_lower
+            searchable_without_ranges_lower
         )
 
         if unit_value_match:
             unit_raw = unit_value_match.group(1)
             value = parse_number(unit_value_match.group(2))
-            unit = "mmol/L" if "mmol" in unit_raw else "mg/dL"
+            unit = normalize_unit(unit_raw)
 
             if is_valid_value(value, unit):
                 return {
                     "value": value,
                     "unit": unit,
+                    "ref_low": ref_low,
+                    "ref_high": ref_high,
                     "priority": glucose_priority(fragment),
                     "line": fragment,
                 }
 
-        unit = detect_unit(searchable)
+        unit = detect_unit(searchable_without_ranges)
 
-        for match in re.finditer(r"\b(\d{1,3}(?:[.,]\d+)?)\b", searchable):
+        for match in re.finditer(r"\b(\d{1,3}(?:[.,]\d+)?)\b", searchable_without_ranges):
             number_text = match.group(1)
-
-            previous_char = searchable[match.start() - 1] if match.start() > 0 else ""
-            next_char = searchable[match.end()] if match.end() < len(searchable) else ""
-
-            if previous_char in "-–—" or next_char in "-–—":
-                continue
-
             value = parse_number(number_text)
 
             if is_valid_value(value, unit):
                 return {
                     "value": value,
                     "unit": unit,
+                    "ref_low": ref_low,
+                    "ref_high": ref_high,
                     "priority": glucose_priority(fragment),
                     "line": fragment,
                 }
@@ -330,7 +394,7 @@ def find_glucose(text: str):
     candidates = []
 
     for i, line in enumerate(lines):
-        context = " ".join(lines[i:i + 3])
+        context = " ".join(lines[i:i + 8])
 
         if not re.search(glucose_keywords_pattern, context.lower()):
             continue
@@ -347,15 +411,15 @@ def find_glucose(text: str):
             candidates.append(candidate)
 
     if not candidates:
-        return None, None
+        return None, None, None, None
 
     candidates.sort(key=lambda item: item["priority"], reverse=True)
     best = candidates[0]
 
-    return best["value"], best["unit"]
+    return best["value"], best["unit"], best["ref_low"], best["ref_high"]
 
 
-def evaluate(value: float, unit: str) -> dict:
+def evaluate(value: float, unit: str, ref_low=None, ref_high=None) -> dict:
     """
     Evaluates glucose value against the reference range.
     The comparison is performed in mg/dL.
@@ -370,8 +434,14 @@ def evaluate(value: float, unit: str) -> dict:
     """
     validation_errors = []
 
-    low = GLUCOSE_REF_LOW
-    high = GLUCOSE_REF_HIGH
+    # low = GLUCOSE_REF_LOW
+    # high = GLUCOSE_REF_HIGH
+
+    # Domyślny zakres tylko jako fallback
+    default_low = GLUCOSE_REF_LOW
+    default_high = GLUCOSE_REF_HIGH
+
+    validation_errors = []
 
     # Validate value
     try:
@@ -396,6 +466,29 @@ def evaluate(value: float, unit: str) -> dict:
             f"Nieobsługiwana jednostka wyniku: {unit}. Przyjęto domyślnie mg/dL."
         )
         unit = "mg/dL"
+
+    # Referencyjny zakres wejściowy
+    try:
+        low = float(ref_low) if ref_low is not None else None
+    except (TypeError, ValueError):
+        low = None
+        validation_errors.append("Nieprawidłowa dolna granica zakresu referencyjnego.")
+
+    try:
+        high = float(ref_high) if ref_high is not None else None
+    except (TypeError, ValueError):
+        high = None
+        validation_errors.append("Nieprawidłowa górna granica zakresu referencyjnego.")
+
+    # Fallback do stałych, jeśli zakres nie został odczytany
+    if low is None:
+        low = default_low
+        validation_errors.append("Nie odczytano dolnej granicy zakresu, użyto wartości domyślnej.")
+
+    if high is None:
+        high = default_high
+        validation_errors.append("Nie odczytano górnej granicy zakresu, użyto wartości domyślnej.")
+
 
     # Convert to mg/dL for comparison
     if unit == "mmol/L":
@@ -456,6 +549,19 @@ def build_glucose_report_html(result: dict, source_name: str = "input.pdf") -> s
     status = result.get("status", "normal")
     ref_low = html.escape(str(result.get("ref_low", "")))
     ref_high = html.escape(str(result.get("ref_high", "")))
+    raw_value = result.get("value", "")
+    raw_unit = result.get("unit", "")
+    raw_value_mgdl = result.get("value_mgdl", "")
+    if raw_unit == "mmol/L" and raw_value_mgdl not in ("", None):
+        converted_value = f"{float(raw_value_mgdl):.1f}"
+        display_value = html.escape(f"{raw_value} mmol/L ≈ {converted_value} mg/dL")
+        display_unit = ""
+        value_class = "value value-small"
+    else:
+        display_value = value
+        display_unit = unit
+        value_class = "value"
+
     validation_errors = result.get("validation_errors", [])
     if validation_errors:
         validation_errors_html = "<ul>" + "".join(
@@ -520,6 +626,11 @@ def build_glucose_report_html(result: dict, source_name: str = "input.pdf") -> s
       line-height: 1;
       margin-bottom: 8px;
     }}
+    .value-small {{
+        font-size: 28px;
+        line-height: 1.25;
+        max-width: 100%;
+    }}
     .unit {{
       color: #6b7280;
       margin-bottom: 16px;
@@ -582,8 +693,8 @@ def build_glucose_report_html(result: dict, source_name: str = "input.pdf") -> s
     </div>
 
     <div class="content">
-      <div class="value">{value}</div>
-      <div class="unit">{unit}</div>
+      <div class="{value_class}">{display_value}</div>
+      <div class="unit">{display_unit}</div>
       <div class="badge">Flaga: {flag} — {label}</div>
 
       <table>

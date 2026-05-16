@@ -5,7 +5,7 @@ from logic import extract_text_from_file, find_glucose, evaluate
 
 
 TEST_DIR = Path("test_inputs/pdf")
-OUTPUT_PATH = Path("outputs/pdf_test_summary.json")
+OUTPUT_PATH = Path("outputs/summaries/pdf_test_summary.json")
 
 
 def expected_flag_from_filename(filename: str):
@@ -76,8 +76,8 @@ def main():
         file_bytes = pdf_file.read_bytes()
         text = extract_text_from_file(file_bytes, pdf_file.name)
 
-        value, unit = find_glucose(text)
-        result = evaluate(value, unit)
+        value, unit, ref_low, ref_high= find_glucose(text)
+        result = evaluate(value, unit, ref_low, ref_high)
 
         predicted_flag = result.get("flag")
         is_correct = expected_flag == predicted_flag if expected_flag else None

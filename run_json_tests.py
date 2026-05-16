@@ -34,8 +34,8 @@ def main():
 
         expected_flag = get_expected_flag(data)
 
-        value, unit = extract_glucose_from_json(data)
-        result = evaluate(value, unit)
+        value, unit, ref_low, ref_high = extract_glucose_from_json(data)
+        result = evaluate(value, unit, ref_low, ref_high)
 
         predicted_flag = result.get("flag")
 
@@ -76,7 +76,7 @@ def main():
     print(f"Correct predictions: {correct}/{total}")
     print(f"Accuracy: {accuracy:.2f}%")
 
-    output_path = Path("outputs/json_test_summary.json")
+    output_path = Path("outputs/summaries/json_test_summary.json")
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
     output_data = {

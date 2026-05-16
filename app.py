@@ -29,14 +29,14 @@ def analyze():
         if not text.strip():
             return jsonify({'error': 'Nie udało się odczytać tekstu z pliku.'}), 422
 
-        value, unit = find_glucose(text)
+        value, unit, ref_low, ref_high = find_glucose(text)
 
         if value is None:
             return jsonify({
                 'error': 'Nie znaleziono parametru "Glukoza" w tym dokumencie.'
             }), 404
 
-        result = evaluate(value, unit)
+        result = evaluate(value, unit, ref_low, ref_high)
         # DODANE
         report_path = save_glucose_report_html(result, source_name=file.filename)
         json_path = save_output_json(result, source_name=file.filename)

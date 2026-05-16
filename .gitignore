@@ -1,4 +1,2 @@
 __pycache__/
 *.pyc
-reports/*.html
-outputs/*.json

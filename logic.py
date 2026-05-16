@@ -191,6 +191,22 @@ def extract_text_from_file(file_bytes: bytes, filename: str) -> str:
 
     raise ValueError("Nieobsługiwany format pliku. Wgraj PDF, PNG, JPG lub JPEG.")
 
+def extract_reference_range(fragment: str):
+    """
+    Tries to extract reference range from text fragment.
+    Supported examples:
+    70 - 99
+    3,9 - 6,1
+    70–99
+    """
+    range_match = re.search(r"(\d{1,3}(?:[.,]\d+)?)\s*[-–—]\s*(\d{1,3}(?:[.,]\d+)?)", fragment)
+    if not range_match:
+        return None, None
+
+    ref_low = float(range_match.group(1).replace(",", "."))
+    ref_high = float(range_match.group(2).replace(",", "."))
+
+    return ref_low, ref_high
 
 def find_glucose(text: str):
     """
@@ -206,7 +222,7 @@ def find_glucose(text: str):
     4. OGTT / after 120 min only if no better result is found
     """
     if not text:
-        return None, None
+        return None, None, None, None
 
     normalized = text.replace("\t", " ")
     normalized = re.sub(r"[ ]{2,}", " ", normalized)
@@ -278,10 +294,15 @@ def find_glucose(text: str):
             unit_raw = value_unit_match.group(2)
             unit = "mmol/L" if "mmol" in unit_raw else "mg/dL"
 
+
             if is_valid_value(value, unit):
+
+                ref_low, ref_high = extract_reference_range(searchable)
                 return {
                     "value": value,
                     "unit": unit,
+                    "ref_low": ref_low,
+                    "ref_high": ref_high,
                     "priority": glucose_priority(fragment),
                     "line": fragment,
                 }
@@ -297,9 +318,13 @@ def find_glucose(text: str):
             unit = "mmol/L" if "mmol" in unit_raw else "mg/dL"
 
             if is_valid_value(value, unit):
+
+                ref_low, ref_high = extract_reference_range(searchable)
                 return {
                     "value": value,
                     "unit": unit,
+                    "ref_low": ref_low,
+                    "ref_high": ref_high,
                     "priority": glucose_priority(fragment),
                     "line": fragment,
                 }
@@ -318,9 +343,12 @@ def find_glucose(text: str):
             value = parse_number(number_text)
 
             if is_valid_value(value, unit):
+                ref_low, ref_high = extract_reference_range(searchable)
                 return {
                     "value": value,
                     "unit": unit,
+                    "ref_low": ref_low,
+                    "ref_high": ref_high,
                     "priority": glucose_priority(fragment),
                     "line": fragment,
                 }
@@ -347,15 +375,15 @@ def find_glucose(text: str):
             candidates.append(candidate)
 
     if not candidates:
-        return None, None
+        return None, None, None, None
 
     candidates.sort(key=lambda item: item["priority"], reverse=True)
     best = candidates[0]
 
-    return best["value"], best["unit"]
+    return best["value"], best["unit"], best.get("ref_low"), best.get("ref_high")
 
 
-def evaluate(value: float, unit: str) -> dict:
+def evaluate(value: float, unit: str, ref_low=None, ref_high=None) -> dict:
     """
     Evaluates glucose value against the reference range.
     The comparison is performed in mg/dL.
@@ -370,8 +398,14 @@ def evaluate(value: float, unit: str) -> dict:
     """
     validation_errors = []
 
-    low = GLUCOSE_REF_LOW
-    high = GLUCOSE_REF_HIGH
+    # low = GLUCOSE_REF_LOW
+    # high = GLUCOSE_REF_HIGH
+
+    # Domyślny zakres tylko jako fallback
+    default_low = GLUCOSE_REF_LOW
+    default_high = GLUCOSE_REF_HIGH
+
+    validation_errors = []
 
     # Validate value
     try:
@@ -396,6 +430,29 @@ def evaluate(value: float, unit: str) -> dict:
             f"Nieobsługiwana jednostka wyniku: {unit}. Przyjęto domyślnie mg/dL."
         )
         unit = "mg/dL"
+
+    # Referencyjny zakres wejściowy
+    try:
+        low = float(ref_low) if ref_low is not None else None
+    except (TypeError, ValueError):
+        low = None
+        validation_errors.append("Nieprawidłowa dolna granica zakresu referencyjnego.")
+
+    try:
+        high = float(ref_high) if ref_high is not None else None
+    except (TypeError, ValueError):
+        high = None
+        validation_errors.append("Nieprawidłowa górna granica zakresu referencyjnego.")
+
+    # Fallback do stałych, jeśli zakres nie został odczytany
+    if low is None:
+        low = default_low
+        validation_errors.append("Nie odczytano dolnej granicy zakresu, użyto wartości domyślnej.")
+
+    if high is None:
+        high = default_high
+        validation_errors.append("Nie odczytano górnej granicy zakresu, użyto wartości domyślnej.")
+
 
     # Convert to mg/dL for comparison
     if unit == "mmol/L":

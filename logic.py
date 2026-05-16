@@ -503,6 +503,9 @@ def evaluate(value: float, unit: str, ref_low=None, ref_high=None) -> dict:
     # Convert to mg/dL for comparison
     if unit == "mmol/L":
         value_mgdl = value * 18.018
+        if low is not None and high is not None and high <= 30:
+            low = low * 18.018
+            high = high * 18.018
     else:
         value_mgdl = value
 

@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from logic import extract_text_from_file, find_glucose, evaluate
+from logic import extract_text_from_file, find_glucose, evaluate, save_glucose_report_html
 
 
 TEST_DIR = Path("test_inputs/pdf")
@@ -59,16 +59,17 @@ def main():
     rows = []
 
     print("\nPDF TEST RESULTS")
-    print("-" * 120)
+    print("-" * 130)
     print(
         f"{'File':60} "
         f"{'Value':>8} "
         f"{'Unit':>8} "
         f"{'Expected':>10} "
         f"{'Predicted':>10} "
-        f"{'Correct':>10}"
+        f"{'Correct':>10} "
+        f"{'Report':>20}"
     )
-    print("-" * 120)
+    print("-" * 130)
 
     for pdf_file in pdf_files:
         expected_flag = expected_flag_from_filename(pdf_file.name)
@@ -76,8 +77,18 @@ def main():
         file_bytes = pdf_file.read_bytes()
         text = extract_text_from_file(file_bytes, pdf_file.name)
 
+        value, unit, ref_low, ref_high = find_glucose(text)
+        result = evaluate(value, unit, ref_low, ref_high)
+
+        report_path = save_glucose_report_html(
+            result,
+            source_name=pdf_file.name,
+            output_dir="reports/pdf"
+        )
+
         value, unit, ref_low, ref_high= find_glucose(text)
         result = evaluate(value, unit, ref_low, ref_high)
+
 
         predicted_flag = result.get("flag")
         is_correct = expected_flag == predicted_flag if expected_flag else None
@@ -96,6 +107,7 @@ def main():
             "predicted_flag": predicted_flag,
             "correct": is_correct,
             "validation_errors": result.get("validation_errors", []),
+            "report_path": str(report_path),
         }
 
         rows.append(row)
@@ -106,10 +118,11 @@ def main():
             f"{str(row['unit']):>8} "
             f"{str(row['expected_flag']):>10} "
             f"{str(row['predicted_flag']):>10} "
-            f"{str(row['correct']):>10}"
+            f"{str(row['correct']):>10} "
+            f"{str(row['report_path']):>20}"
         )
 
-    print("-" * 120)
+    print("-" * 130)
 
     accuracy = correct / total * 100 if total else 0
 

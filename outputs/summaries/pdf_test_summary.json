@@ -12,7 +12,11 @@
       "expected_flag": "N",
       "predicted_flag": "N",
       "correct": true,
-      "validation_errors": []
+      "validation_errors": [
+        "Nie odczytano dolnej granicy zakresu, użyto wartości domyślnej.",
+        "Nie odczytano górnej granicy zakresu, użyto wartości domyślnej."
+      ],
+      "report_path": "reports\\pdf\\pacjent_01_glukoza_w_normie_z_zakresami_referencyjnymi_report.html"
     },
     {
       "file": "pacjent_02_glukoza_troche_ponizej_normy_z_zakresami_referencyjnymi.pdf",
@@ -22,7 +26,11 @@
       "expected_flag": "L",
       "predicted_flag": "L",
       "correct": true,
-      "validation_errors": []
+      "validation_errors": [
+        "Nie odczytano dolnej granicy zakresu, użyto wartości domyślnej.",
+        "Nie odczytano górnej granicy zakresu, użyto wartości domyślnej."
+      ],
+      "report_path": "reports\\pdf\\pacjent_02_glukoza_troche_ponizej_normy_z_zakresami_referencyjnymi_report.html"
     },
     {
       "file": "pacjent_03_glukoza_skrajnie_niska_z_zakresami_referencyjnymi.pdf",
@@ -32,7 +40,11 @@
       "expected_flag": "L",
       "predicted_flag": "L",
       "correct": true,
-      "validation_errors": []
+      "validation_errors": [
+        "Nie odczytano dolnej granicy zakresu, użyto wartości domyślnej.",
+        "Nie odczytano górnej granicy zakresu, użyto wartości domyślnej."
+      ],
+      "report_path": "reports\\pdf\\pacjent_03_glukoza_skrajnie_niska_z_zakresami_referencyjnymi_report.html"
     },
     {
       "file": "pacjent_04_glukoza_troche_powyzej_normy_z_zakresami_referencyjnymi.pdf",
@@ -42,7 +54,11 @@
       "expected_flag": "H",
       "predicted_flag": "H",
       "correct": true,
-      "validation_errors": []
+      "validation_errors": [
+        "Nie odczytano dolnej granicy zakresu, użyto wartości domyślnej.",
+        "Nie odczytano górnej granicy zakresu, użyto wartości domyślnej."
+      ],
+      "report_path": "reports\\pdf\\pacjent_04_glukoza_troche_powyzej_normy_z_zakresami_referencyjnymi_report.html"
     },
     {
       "file": "pacjent_05_glukoza_skrajnie_wysoka_z_zakresami_referencyjnymi.pdf",
@@ -52,7 +68,11 @@
       "expected_flag": "H",
       "predicted_flag": "H",
       "correct": true,
-      "validation_errors": []
+      "validation_errors": [
+        "Nie odczytano dolnej granicy zakresu, użyto wartości domyślnej.",
+        "Nie odczytano górnej granicy zakresu, użyto wartości domyślnej."
+      ],
+      "report_path": "reports\\pdf\\pacjent_05_glukoza_skrajnie_wysoka_z_zakresami_referencyjnymi_report.html"
     },
     {
       "file": "pacjent_06_norma_hematologia_biochemia_z_zakresami_referencyjnymi.pdf",
@@ -62,7 +82,11 @@
       "expected_flag": "N",
       "predicted_flag": "N",
       "correct": true,
-      "validation_errors": []
+      "validation_errors": [
+        "Nie odczytano dolnej granicy zakresu, użyto wartości domyślnej.",
+        "Nie odczytano górnej granicy zakresu, użyto wartości domyślnej."
+      ],
+      "report_path": "reports\\pdf\\pacjent_06_norma_hematologia_biochemia_z_zakresami_referencyjnymi_report.html"
     },
     {
       "file": "pacjent_07_troche_ponizej_normy_hematologia_biochemia_z_zakresami_referencyjnymi.pdf",
@@ -72,7 +96,11 @@
       "expected_flag": "L",
       "predicted_flag": "L",
       "correct": true,
-      "validation_errors": []
+      "validation_errors": [
+        "Nie odczytano dolnej granicy zakresu, użyto wartości domyślnej.",
+        "Nie odczytano górnej granicy zakresu, użyto wartości domyślnej."
+      ],
+      "report_path": "reports\\pdf\\pacjent_07_troche_ponizej_normy_hematologia_biochemia_z_zakresami_referencyjnymi_report.html"
     },
     {
       "file": "pacjent_08_skrajnie_niska_glukoza_hematologia_biochemia_z_zakresami_referencyjnymi.pdf",
@@ -82,7 +110,11 @@
       "expected_flag": "L",
       "predicted_flag": "L",
       "correct": true,
-      "validation_errors": []
+      "validation_errors": [
+        "Nie odczytano dolnej granicy zakresu, użyto wartości domyślnej.",
+        "Nie odczytano górnej granicy zakresu, użyto wartości domyślnej."
+      ],
+      "report_path": "reports\\pdf\\pacjent_08_skrajnie_niska_glukoza_hematologia_biochemia_z_zakresami_referencyjnymi_report.html"
     },
     {
       "file": "pacjent_09_troche_powyzej_normy_hematologia_biochemia_z_zakresami_referencyjnymi.pdf",
@@ -92,7 +124,11 @@
       "expected_flag": "H",
       "predicted_flag": "H",
       "correct": true,
-      "validation_errors": []
+      "validation_errors": [
+        "Nie odczytano dolnej granicy zakresu, użyto wartości domyślnej.",
+        "Nie odczytano górnej granicy zakresu, użyto wartości domyślnej."
+      ],
+      "report_path": "reports\\pdf\\pacjent_09_troche_powyzej_normy_hematologia_biochemia_z_zakresami_referencyjnymi_report.html"
     },
     {
       "file": "pacjent_10_skrajnie_wysoka_glukoza_hematologia_biochemia_z_zakresami_referencyjnymi.pdf",
@@ -102,7 +138,11 @@
       "expected_flag": "H",
       "predicted_flag": "H",
       "correct": true,
-      "validation_errors": []
+      "validation_errors": [
+        "Nie odczytano dolnej granicy zakresu, użyto wartości domyślnej.",
+        "Nie odczytano górnej granicy zakresu, użyto wartości domyślnej."
+      ],
+      "report_path": "reports\\pdf\\pacjent_10_skrajnie_wysoka_glukoza_hematologia_biochemia_z_zakresami_referencyjnymi_report.html"
     }
   ]
 }

@@ -338,7 +338,7 @@
 <main>
   <!-- Hero -->
   <div class="hero">
-    <h1>Sprawdź poziom<br /><em>glukozy</em> z PDF-a</h1>
+    <h1>Sprawdź poziom<br /><em>glukozy</em> z PDF-a lub zdjęcia</h1>
     <p>Wgraj plik z wynikami badań krwi, a my automatycznie odczytamy wartość glukozy i ocenimy ją względem zakresu referencyjnego.</p>
   </div>
 
@@ -346,14 +346,14 @@
   <div class="card">
     <div class="card-header">
       <div class="step">1</div>
-      <h2>Wybierz plik PDF z wynikami</h2>
+      <h2>Wybierz plik PDF, skan lub zdjęcie z wynikami</h2>
     </div>
     <div class="card-body">
       <div class="drop-zone" id="drop-zone">
-        <input type="file" id="pdf-input" accept=".pdf" />
+        <input type="file" id="pdf-input" accept=".pdf,.png,.jpg,.jpeg" />
         <span class="drop-icon">📄</span>
         <p><strong>Kliknij lub przeciągnij plik tutaj</strong></p>
-        <p>Obsługiwane: pliki .pdf z wynikami laboratoryjnymi</p>
+        <p>Obsługiwane: PDF, PNG, JPG lub JPEG z wynikami laboratoryjnymi</p>
         <div id="file-name"></div>
       </div>
 
@@ -480,8 +480,10 @@
   });
 
   function setFile(file) {
-    if (!file.name.toLowerCase().endsWith('.pdf')) {
-      showError('Proszę wybrać plik w formacie .pdf');
+    const allowedExtensions = ['.pdf', '.png', '.jpg', '.jpeg'];
+    const fileName = file.name.toLowerCase();
+    if (!allowedExtensions.some(ext => fileName.endsWith(ext))) {
+      showError('Proszę wybrać plik PDF, PNG, JPG lub JPEG.');
       return;
     }
     hideError();

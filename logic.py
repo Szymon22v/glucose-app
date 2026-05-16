@@ -6,90 +6,262 @@ from datetime import datetime
 import html
 import json
 
+import fitz  # PyMuPDF
+import easyocr
+import numpy as np
+from PIL import Image, ImageOps, ImageEnhance, ImageFilter
+
+
 # ─── Stałe referencyjne ───────────────────────────────────────────────────────
-GLUCOSE_REF_LOW  = 70    # mg/dL
+GLUCOSE_REF_LOW = 70     # mg/dL
 GLUCOSE_REF_HIGH = 99    # mg/dL
 
 
+# ─── EasyOCR reader ───────────────────────────────────────────────────────────
+_OCR_READER = None
+
+
+def get_ocr_reader():
+    """
+    Creates and returns EasyOCR reader.
+    Polish and English languages are used.
+    GPU is disabled to make the app work on normal computers.
+    """
+    global _OCR_READER
+
+    if _OCR_READER is None:
+        _OCR_READER = easyocr.Reader(["pl", "en"], gpu=False)
+
+    return _OCR_READER
+
+
+def preprocess_image_for_ocr(image: Image.Image) -> Image.Image:
+    """
+    Prepares image for OCR.
+    The image is corrected, enlarged, sharpened and contrast-enhanced.
+    This improves recognition of small text in medical reports.
+    """
+    image = ImageOps.exif_transpose(image)
+    image = image.convert("RGB")
+
+    # Enlarge small images before OCR.
+    width, height = image.size
+    scale = 2
+
+    if max(width, height) < 2500:
+        image = image.resize((width * scale, height * scale), Image.Resampling.LANCZOS)
+
+    # Improve contrast and sharpness.
+    image = ImageOps.autocontrast(image)
+    image = ImageEnhance.Contrast(image).enhance(1.8)
+    image = ImageEnhance.Sharpness(image).enhance(2.0)
+    image = image.filter(ImageFilter.SHARPEN)
+
+    return image
+
+
+def ocr_image_to_text(image: Image.Image) -> str:
+    """
+    Reads text from a PIL image using EasyOCR.
+    Parameters are adjusted for smaller text in laboratory reports.
+    """
+    image = preprocess_image_for_ocr(image)
+    image_array = np.array(image)
+
+    reader = get_ocr_reader()
+
+    results = reader.readtext(
+        image_array,
+        detail=1,
+        paragraph=False,
+        decoder="beamsearch",
+        beamWidth=5,
+        mag_ratio=2.0,
+        canvas_size=3500,
+        text_threshold=0.5,
+        low_text=0.3,
+        link_threshold=0.3,
+        contrast_ths=0.1,
+        adjust_contrast=0.7,
+        width_ths=1.0,
+    )
+
+    lines = []
+
+    for bbox, text, confidence in results:
+        # Ignore very weak detections.
+        if confidence < 0.20:
+            continue
+
+        y_center = sum(point[1] for point in bbox) / 4
+        x_min = min(point[0] for point in bbox)
+
+        lines.append((y_center, x_min, text))
+
+    if not lines:
+        return ""
+
+    # Sort text from top to bottom and left to right.
+    lines.sort(key=lambda item: (item[0], item[1]))
+
+    grouped_lines = []
+    current_line = []
+    current_y = lines[0][0]
+
+    for y, x, text in lines:
+        if abs(y - current_y) > 25:
+            grouped_lines.append(" ".join(current_line))
+            current_line = [text]
+            current_y = y
+        else:
+            current_line.append(text)
+
+    if current_line:
+        grouped_lines.append(" ".join(current_line))
+
+    return "\n".join(grouped_lines)
+
+
+def extract_text_from_image(file_bytes: bytes) -> str:
+    """
+    Extracts text from image file using OCR.
+    Supported formats: PNG, JPG, JPEG.
+    """
+    image = Image.open(io.BytesIO(file_bytes))
+    return ocr_image_to_text(image)
+
+
+def extract_text_from_scanned_pdf(file_bytes: bytes, dpi: int = 400) -> str:
+    """
+    Converts each page of scanned PDF into an image
+    and extracts text using EasyOCR.
+    """
+    pages_text = []
+
+    with fitz.open(stream=file_bytes, filetype="pdf") as doc:
+        for page in doc:
+            pix = page.get_pixmap(dpi=dpi)
+            image_bytes = pix.tobytes("png")
+            image = Image.open(io.BytesIO(image_bytes))
+
+            page_text = ocr_image_to_text(image)
+            pages_text.append(page_text)
+
+    return "\n".join(pages_text)
+
+
 def extract_text_from_pdf(file_bytes: bytes) -> str:
-    """Zwraca cały tekst ze wszystkich stron PDF-a."""
+    """
+    Extracts text from PDF.
+    First, it tries normal text extraction with pdfplumber.
+    If the PDF has no selectable text, OCR is used.
+    """
     text = ""
-    with pdfplumber.open(io.BytesIO(file_bytes)) as pdf:
-        for page in pdf.pages:
-            page_text = page.extract_text()
-            if page_text:
-                text += page_text + "\n"
-    return text
+
+    try:
+        with pdfplumber.open(io.BytesIO(file_bytes)) as pdf:
+            for page in pdf.pages:
+                page_text = page.extract_text()
+                if page_text:
+                    text += page_text + "\n"
+    except Exception:
+        text = ""
+
+    text = text.strip()
+
+    if len(text) > 20:
+        return text
+
+    return extract_text_from_scanned_pdf(file_bytes)
+
+
+def extract_text_from_file(file_bytes: bytes, filename: str) -> str:
+    """
+    Extracts text from PDF or image file.
+    Text PDF files are handled by pdfplumber.
+    Scanned PDF files and images are handled by EasyOCR.
+    """
+    filename = filename.lower()
+
+    if filename.endswith(".pdf"):
+        return extract_text_from_pdf(file_bytes)
+
+    if filename.endswith((".png", ".jpg", ".jpeg")):
+        return extract_text_from_image(file_bytes)
+
+    raise ValueError("Nieobsługiwany format pliku. Wgraj PDF, PNG, JPG lub JPEG.")
 
 
 def find_glucose(text: str):
     """
-    Szuka linii zawierającej 'glukoza' i wyciąga wartość numeryczną.
-    Obsługuje różne formaty tabel z wyników laboratoryjnych.
-
-    Przykładowe linie:
-      Glukoza 168 mg/dL 70 - 99
-      Glukoza 127 mg/dL 70 - 99
-      Glukoza 92 mg/dL 70 - 99
+    Searches for glucose value and unit in extracted text.
+    The function looks for a line containing 'glukoza' or 'glucose'.
     """
+    normalized = re.sub(r"[ \t]+", " ", text)
 
-    # Normalizacja – zamień tabulatory / wielokrotne spacje na pojedyncze
-    normalized = re.sub(r'[ \t]+', ' ', text)
-
-    # Szukamy linii z 'glukoza' (case-insensitive)
     for line in normalized.splitlines():
-        if re.search(r'glukoza', line, re.IGNORECASE):
-            # Wyciągnij pierwszą liczbę dziesiętną z tej linii
-            # (może być z przecinkiem lub kropką jako separator dziesiętny)
-            numbers = re.findall(r'\b(\d{2,3}(?:[.,]\d+)?)\b', line)
-            if numbers:
-                value_str = numbers[0].replace(',', '.')
-                value = float(value_str)
-                # Prosta sanitacja – glukoza w mg/dL mieści się w 20–600
-                if 20 <= value <= 600:
-                    # Sprawdź czy w linii jest mmol/L
-                    unit = 'mmol/L' if 'mmol' in line.lower() else 'mg/dL'
-                    return value, unit
+        line_lower = line.lower()
+
+        if "glukoza" not in line_lower and "glucose" not in line_lower:
+            continue
+
+        numbers = re.findall(r"\b(\d{1,3}(?:[.,]\d+)?)\b", line)
+
+        if numbers:
+            value_str = numbers[0].replace(",", ".")
+            value = float(value_str)
+
+            if 20 <= value <= 600:
+                unit = "mmol/L" if "mmol" in line_lower else "mg/dL"
+                return value, unit
 
     return None, None
 
+
 def evaluate(value: float, unit: str) -> dict:
-    """Ocenia wartość glukozy względem zakresu referencyjnego."""
-    low  = GLUCOSE_REF_LOW
+    """
+    Evaluates glucose value against the reference range.
+    The comparison is performed in mg/dL.
+    """
+    low = GLUCOSE_REF_LOW
     high = GLUCOSE_REF_HIGH
 
-    # Przelicz mmol/L → mg/dL jeśli potrzeba
-    if unit == 'mmol/L':
+    if unit == "mmol/L":
         value_mgdl = value * 18.018
     else:
         value_mgdl = value
 
     if value_mgdl < low:
-        status  = 'low'
-        label   = 'Za niska'
-        advice  = ('Twój poziom glukozy jest poniżej normy (hipoglikemia). '
-                   'Skonsultuj się z lekarzem.')
+        status = "low"
+        label = "Za niska"
+        advice = (
+            "Twój poziom glukozy jest poniżej normy (hipoglikemia). "
+            "Skonsultuj się z lekarzem."
+        )
     elif value_mgdl > high:
-        status  = 'high'
-        label   = 'Za wysoka'
-        advice  = ('Twój poziom glukozy jest powyżej normy. '
-                   'Może to wskazywać na stan przedcukrzycowy lub cukrzycę. '
-                   'Skonsultuj się z lekarzem.')
+        status = "high"
+        label = "Za wysoka"
+        advice = (
+            "Twój poziom glukozy jest powyżej normy. "
+            "Może to wskazywać na stan przedcukrzycowy lub cukrzycę. "
+            "Skonsultuj się z lekarzem."
+        )
     else:
-        status  = 'normal'
-        label   = 'W normie'
-        advice  = 'Twój poziom glukozy jest prawidłowy. Tak trzymaj!'
+        status = "normal"
+        label = "W normie"
+        advice = "Twój poziom glukozy jest prawidłowy. Tak trzymaj!"
 
     return {
-        'value':       value,
-        'value_mgdl':  round(value_mgdl, 1),
-        'unit':        unit,
-        'status':      status,
-        'label':       label,
-        'advice':      advice,
-        'ref_low':     low,
-        'ref_high':    high,
+        "value": value,
+        "value_mgdl": round(value_mgdl, 1),
+        "unit": unit,
+        "status": status,
+        "label": label,
+        "advice": advice,
+        "ref_low": low,
+        "ref_high": high,
     }
+
 
 def build_glucose_report_html(result: dict, source_name: str = "input.pdf") -> str:
     value = html.escape(str(result.get("value", "")))
@@ -108,7 +280,10 @@ def build_glucose_report_html(result: dict, source_name: str = "input.pdf") -> s
         "low": ("#fffbeb", "#f59e0b", "#fde68a"),
     }
 
-    bg, text_color, border = status_colors.get(status, ("#f8fafc", "#1f2937", "#cbd5e1"))
+    bg, text_color, border = status_colors.get(
+        status,
+        ("#f8fafc", "#1f2937", "#cbd5e1")
+    )
 
     return f"""<!DOCTYPE html>
 <html lang="pl">
@@ -244,7 +419,11 @@ def build_glucose_report_html(result: dict, source_name: str = "input.pdf") -> s
 """
 
 
-def save_glucose_report_html(result: dict, source_name: str = "input.pdf", output_dir: str = "reports") -> str:
+def save_glucose_report_html(
+    result: dict,
+    source_name: str = "input.pdf",
+    output_dir: str = "reports"
+) -> str:
     Path(output_dir).mkdir(parents=True, exist_ok=True)
 
     safe_name = Path(source_name).stem.replace(" ", "_")
@@ -256,7 +435,11 @@ def save_glucose_report_html(result: dict, source_name: str = "input.pdf", outpu
     return str(output_path)
 
 
-def save_output_json(result: dict, source_name: str = "input.pdf", output_dir: str = "outputs") -> str:
+def save_output_json(
+    result: dict,
+    source_name: str = "input.pdf",
+    output_dir: str = "outputs"
+) -> str:
     Path(output_dir).mkdir(parents=True, exist_ok=True)
 
     safe_name = Path(source_name).stem.replace(" ", "_")

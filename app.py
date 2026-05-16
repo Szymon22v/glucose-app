@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify, render_template
-from logic import extract_text_from_pdf, find_glucose, evaluate, save_glucose_report_html, save_output_json
+from logic import extract_text_from_file, find_glucose, evaluate, save_glucose_report_html, save_output_json
 
 app = Flask(__name__)
 
@@ -13,19 +13,21 @@ def index():
 @app.route('/analyze', methods=['POST'])
 def analyze():
     if 'pdf' not in request.files:
-        return jsonify({'error': 'Nie przesłano pliku PDF.'}), 400
+        return jsonify({'error': 'Nie przesłano pliku.'}), 400
 
     file = request.files['pdf']
 
-    if file.filename == '' or not file.filename.lower().endswith('.pdf'):
-        return jsonify({'error': 'Proszę wybrać plik PDF.'}), 400
+    allowed_extensions = (".pdf", ".png", ".jpg", ".jpeg")
+    
+    if file.filename == "" or not file.filename.lower().endswith(allowed_extensions):
+        return jsonify({'error': 'Proszę wybrać plik PDF, PNG, JPG lub JPEG.'}), 400
 
     try:
         file_bytes = file.read()
-        text       = extract_text_from_pdf(file_bytes)
+        text = extract_text_from_file(file_bytes, file.filename)
 
         if not text.strip():
-            return jsonify({'error': 'Nie udało się odczytać tekstu z PDF.'}), 422
+            return jsonify({'error': 'Nie udało się odczytać tekstu z pliku.'}), 422
 
         value, unit = find_glucose(text)
 

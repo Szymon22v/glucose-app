@@ -24,7 +24,6 @@ Obecna wersja projektu obsługuje:
 - **obrazy i zdjęcia wyników badań** w formacie `.png`, `.jpg`, `.jpeg` odczytywane przy pomocy OCR,
 - **analizę plików JSON** uruchamianą z poziomu CLI.
 
-
 ## Uruchamianie
 
 ### JSON
@@ -65,6 +64,91 @@ http://127.0.0.1:5000
 
 ---
 
+## Testowanie
+
+Projekt zawiera trzy zestawy danych testowych:
+- `test_inputs/json` – pliki JSON,
+- `test_inputs/pdf` – pliki PDF,
+- `test_inputs/images` – obrazy JPG/PNG/JPEG.
+
+Testy można uruchomić osobno dla każdego typu danych.
+
+### Testy JSON
+
+```bash
+python run_json_tests.py
+```
+
+Na Windowsie można użyć:
+
+```bash
+py run_json_tests.py
+```
+
+Po uruchomieniu testów generowane są:
+- podsumowanie testów w pliku `outputs/summaries/json_test_summary.json`,
+- raporty HTML w folderze `reports/json`.
+
+### Testy PDF
+
+```bash
+python run_pdf_tests.py
+```
+
+Na Windowsie można użyć:
+
+```bash
+py run_pdf_tests.py
+```
+
+Po uruchomieniu testów generowane są:
+- podsumowanie testów w pliku `outputs/summaries/pdf_test_summary.json`,
+- raporty HTML w folderze `reports/pdf`.
+
+### Testy obrazów
+
+```bash
+python run_image_tests.py
+```
+
+Na Windowsie można użyć:
+
+```bash
+py run_image_tests.py
+```
+
+Po uruchomieniu testów generowane są:
+- podsumowanie testów w pliku `outputs/summaries/image_test_summary.json`,
+- raporty HTML w folderze `reports/images`.
+
+### Wyniki testów
+
+W aktualnej wersji projektu testy zostały przygotowane dla 3 zestawów danych:
+- JSON,
+- PDF,
+- obrazy JPG/PNG/JPEG.
+
+Dla każdego zestawu przygotowano 10 przykładów testowych. Testy sprawdzają, czy aplikacja poprawnie odczytuje wynik glukozy, jednostkę oraz przypisuje właściwą flagę:
+- `L` – wynik poniżej normy,
+- `N` – wynik w normie,
+- `H` – wynik powyżej normy.
+
+Podsumowania testów są zapisywane w folderze:
+
+```bash
+outputs/summaries
+```
+
+Raporty HTML wygenerowane podczas testów są zapisywane w folderach:
+
+```bash
+reports/json
+reports/pdf
+reports/images
+```
+
+---
+
 ## Wymagania
 
 Należy mieć zainstalowane:
@@ -80,7 +164,6 @@ Biblioteki:
 - Pillow
 - NumPy
 
-
 Instalacja:
 
 ```bash
@@ -92,6 +175,7 @@ Na Windowsie można użyć:
 ```bash
 py -m pip install -r requirements.txt
 ```
+
 ## Uwagi dotyczące OCR
 
 Skuteczność OCR zależy od jakości pliku wejściowego.

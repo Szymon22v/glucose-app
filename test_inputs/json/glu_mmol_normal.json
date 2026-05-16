@@ -1,0 +1,16 @@
+{
+  "resourceType": "DiagnosticReport",
+  "patientId": "P008",
+  "description": "Test case for Glucose",
+  "result": [
+    {
+      "code": "GLU",
+      "name": "Glucose",
+      "value": 5.1,
+      "unit": "mmol/L",
+      "refLow": 70,
+      "refHigh": 99,
+      "expectedFlag": "N"
+    }
+  ]
+}

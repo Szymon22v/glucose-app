@@ -1,16 +1,16 @@
 {
   "resourceType": "DiagnosticReport",
-  "patientId": "P003",
+  "patientId": "P007",
   "description": "Test case for Glukoza",
   "result": [
     {
       "code": "GLU",
       "name": "Glukoza",
-      "value": 168,
+      "value": 99,
       "unit": "mg/dL",
       "refLow": 70,
       "refHigh": 99,
-      "expectedFlag": "H"
+      "expectedFlag": "N"
     }
   ]
 }

@@ -1,5 +1,5 @@
 {
-  "source_file": "pacjent_05_glukoza_skrajnie_wysoka.pdf",
+  "source_file": "pacjent_05_glukoza_skrajnie_wysoka_z_zakresami_referencyjnymi.pdf",
   "test": "GLU",
   "value": 286.0,
   "unit": "mg/dL",
@@ -8,7 +8,7 @@
   "flag": "H",
   "label": "Za wysoka",
   "advice": "Twój poziom glukozy jest powyżej normy. Może to wskazywać na stan przedcukrzycowy lub cukrzycę. Skonsultuj się z lekarzem.",
-  "ref_low": 70,
-  "ref_high": 99,
+  "ref_low": 70.0,
+  "ref_high": 99.0,
   "validation_errors": []
 }

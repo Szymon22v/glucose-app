@@ -1,5 +1,5 @@
 {
-  "source_file": "pacjent_08_skrajnie_niska_glukoza_hematologia_biochemia_bez_zakresow.pdf",
+  "source_file": "pacjent_03_glukoza_skrajnie_niska_z_zakresami_referencyjnymi.pdf",
   "test": "GLU",
   "value": 38.0,
   "unit": "mg/dL",
@@ -8,7 +8,7 @@
   "flag": "L",
   "label": "Za niska",
   "advice": "Twój poziom glukozy jest poniżej normy (hipoglikemia). Skonsultuj się z lekarzem.",
-  "ref_low": 70,
-  "ref_high": 99,
+  "ref_low": 70.0,
+  "ref_high": 99.0,
   "validation_errors": []
 }

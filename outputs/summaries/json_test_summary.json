@@ -1,0 +1,97 @@
+{
+  "total_tests": 10,
+  "correct_predictions": 10,
+  "accuracy_percent": 100.0,
+  "results": [
+    {
+      "file": "glu_border_high.json",
+      "value": 99.0,
+      "unit": "mg/dL",
+      "value_mgdl": 99.0,
+      "expected_flag": "N",
+      "predicted_flag": "N",
+      "correct": true
+    },
+    {
+      "file": "glu_border_low.json",
+      "value": 70.0,
+      "unit": "mg/dL",
+      "value_mgdl": 70.0,
+      "expected_flag": "N",
+      "predicted_flag": "N",
+      "correct": true
+    },
+    {
+      "file": "glu_fasting_normal.json",
+      "value": 85.0,
+      "unit": "mg/dL",
+      "value_mgdl": 85.0,
+      "expected_flag": "N",
+      "predicted_flag": "N",
+      "correct": true
+    },
+    {
+      "file": "glu_high.json",
+      "value": 168.0,
+      "unit": "mg/dL",
+      "value_mgdl": 168.0,
+      "expected_flag": "H",
+      "predicted_flag": "H",
+      "correct": true
+    },
+    {
+      "file": "glu_low.json",
+      "value": 63.0,
+      "unit": "mg/dL",
+      "value_mgdl": 63.0,
+      "expected_flag": "L",
+      "predicted_flag": "L",
+      "correct": true
+    },
+    {
+      "file": "glu_mmol_high.json",
+      "value": 7.2,
+      "unit": "mmol/L",
+      "value_mgdl": 129.7,
+      "expected_flag": "H",
+      "predicted_flag": "H",
+      "correct": true
+    },
+    {
+      "file": "glu_mmol_normal.json",
+      "value": 5.1,
+      "unit": "mmol/L",
+      "value_mgdl": 91.9,
+      "expected_flag": "N",
+      "predicted_flag": "N",
+      "correct": true
+    },
+    {
+      "file": "glu_normal.json",
+      "value": 91.0,
+      "unit": "mg/dL",
+      "value_mgdl": 91.0,
+      "expected_flag": "N",
+      "predicted_flag": "N",
+      "correct": true
+    },
+    {
+      "file": "glu_very_high.json",
+      "value": 265.0,
+      "unit": "mg/dL",
+      "value_mgdl": 265.0,
+      "expected_flag": "H",
+      "predicted_flag": "H",
+      "correct": true
+    },
+    {
+      "file": "glu_very_low.json",
+      "value": 45.0,
+      "unit": "mg/dL",
+      "value_mgdl": 45.0,
+      "expected_flag": "L",
+      "predicted_flag": "L",
+      "correct": true
+    }
+  ]
+}

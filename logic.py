@@ -325,10 +325,7 @@ def find_glucose(text: str):
         if not keyword_match:
             return None
 
-        start = max(0, keyword_match.start() - 120)
-        end = min(len(fragment), keyword_match.end() + 260)
-        searchable = fragment[start:end]
-
+        searchable = fragment[keyword_match.start():]
         ref_low, ref_high = extract_reference_range(searchable)
 
 
@@ -403,7 +400,7 @@ def find_glucose(text: str):
     candidates = []
 
     for i, line in enumerate(lines):
-        context = " ".join(lines[i:i + 8])
+        context = line
 
         if not re.search(glucose_keywords_pattern, context.lower()):
             continue

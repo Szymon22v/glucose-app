@@ -1,7 +1,7 @@
 {
   "test_set": "json",
-  "total_tests": 10,
-  "correct_predictions": 10,
+  "total_tests": 8,
+  "correct_predictions": 8,
   "accuracy_percent": 100.0,
   "results": [
     {
@@ -83,26 +83,6 @@
       "predicted_flag": "N",
       "correct": true,
       "report_path": "reports\\json\\glu_normal_report.html"
-    },
-    {
-      "file": "glu_very_high.json",
-      "value": 265.0,
-      "unit": "mg/dL",
-      "value_mgdl": 265.0,
-      "expected_flag": "H",
-      "predicted_flag": "H",
-      "correct": true,
-      "report_path": "reports\\json\\glu_very_high_report.html"
-    },
-    {
-      "file": "glu_very_low.json",
-      "value": 45.0,
-      "unit": "mg/dL",
-      "value_mgdl": 45.0,
-      "expected_flag": "L",
-      "predicted_flag": "L",
-      "correct": true,
-      "report_path": "reports\\json\\glu_very_low_report.html"
     }
   ]
 }

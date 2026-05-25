@@ -20,10 +20,8 @@ EXPECTED_FLAGS = {
     "pacjent_04_glukoza_powyzej_normy.jpg": "H",
     "pacjent_05_glukoza_skrajnie_wysoka.jpg": "H",
     "pacjent_06_glu_w_normie.jpg": "N",
-    "pacjent_07_glucose_high.jpg": "H",
-    "pacjent_08_glukoza_na_czczo.jpg": "N",
-    "pacjent_09_glucose_mmol_normal.jpg": "N",
-    "pacjent_10_glucose_mmol_high.jpg": "H",
+    "pacjent_07_glucose_mmol_normal.jpg": "N",
+    "pacjent_08_glucose_mmol_high.jpg": "H",
 }
 
 

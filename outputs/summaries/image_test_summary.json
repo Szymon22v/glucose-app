@@ -1,8 +1,8 @@
 {
   "test_set": "images",
-  "total_tests": 8,
+  "total_tests": 10,
   "correct_predictions": 8,
-  "accuracy_percent": 100.0,
+  "accuracy_percent": 80.0,
   "results": [
     {
       "file": "pacjent_01_glukoza_w_normie.jpg",
@@ -77,7 +77,37 @@
       "report_path": "reports\\images\\pacjent_06_glu_w_normie_report.html"
     },
     {
-      "file": "pacjent_07_glucose_mmol_normal.jpg",
+      "file": "pacjent_07_glucose_high.jpg",
+      "value": 90.0,
+      "unit": "mg/dL",
+      "value_mgdl": 90.0,
+      "expected_flag": "H",
+      "predicted_flag": "N",
+      "correct": false,
+      "validation_errors": [
+        "Nie odczytano dolnej granicy zakresu, użyto wartości domyślnej.",
+        "Nie odczytano górnej granicy zakresu, użyto wartości domyślnej."
+      ],
+      "ocr_text": "Laboratorium Medyczne\nLM/2026/05/001234 ul. Zdrowa 15, 00-001 W Nr raportu:\ntel. 22 123 45 67\nData raportu: 13-05-2026 15\nNIP: 123-456-78-90\nMateriał: krew żylna, surowicalosocze Adam Lewandowsk Pacjent:\nPESEL: 90010112345 Data pobrania:l3-05-2026 08.30\nData urodzenia: 01-01-1 Data przyjęcial3-05-2026 12.\nPłeć: Kobieta\nBiochemia\nBadanie Jednostka Zakres ref: Wynik\n168 mgldL 70-99 Glukoza\n0.50 0.90 0.82 = Kreatynina mgldL\neGFR > 90 102 hllminl1.73m ^\n190 174 Cholesterol całkowity < mgIdL\nALT 35 22 UIL\nZatwierdził: Uwagi: Brak uwag.\nmgr Anna Nowak\nDiagnosta Laboratoryjny\nRaport testowy do ręcznego uzupełnien\nStrona 1 Z 1",
+      "report_path": "reports\\images\\pacjent_07_glucose_high_report.html"
+    },
+    {
+      "file": "pacjent_08_glukoza_na_czczo.jpg",
+      "value": 190.0,
+      "unit": "mg/dL",
+      "value_mgdl": 190.0,
+      "expected_flag": "N",
+      "predicted_flag": "H",
+      "correct": false,
+      "validation_errors": [
+        "Nie odczytano dolnej granicy zakresu, użyto wartości domyślnej.",
+        "Nie odczytano górnej granicy zakresu, użyto wartości domyślnej."
+      ],
+      "ocr_text": "Laboratorium Medyczne\nLM/2026/05/001234 ul. Zdrowa 15, 00-001 Wa Nr raportu:\ntel. 22 123 45 67\nData raportu: 13-05-2026 15\nNIP: 123-456-78-90\nMateriał: krew żylna, surowicalosocze Pacjent: Natalia Kamińska\n90010112345 PESEL: Data pobrania:l3-05-2026 08.30\nData urodzenia: 01-01-1 Data przyjęcial3-05-2026 1\nPłeć: Kobieta\nBiochemia\nBadanie Zakres ref. Jednostka Wynik\nmgldL 89 70-99 Glukoza na czczo\n1.10 0.60 0.94 Kreatynina mgldL\n190 Cholesterol całkowity 188 < mgldL\nALT 35 28 UIL <\n150 112 Triglicerydy mgldL\nZatwierdził: Uwagi: Brak uwag.\nmgr Anna Nowak\nDiagnosta Laboratoryjny\nRaport testowy do ręcznego uzupełni\nStrona 1 Z 1",
+      "report_path": "reports\\images\\pacjent_08_glukoza_na_czczo_report.html"
+    },
+    {
+      "file": "pacjent_09_glucose_mmol_normal.jpg",
       "value": 5.1,
       "unit": "mmol/L",
       "value_mgdl": 91.9,
@@ -86,10 +116,10 @@
       "correct": true,
       "validation_errors": [],
       "ocr_text": "Laboratorium Medyczne\nLM/2026/05/001234 ul. Zdrowa 15, 00-001 Wa Nr raportu:\ntel. 22 123 45 67\nData raportu: 13-05-2026 15\nNIP: 123-456-78-90\nMateriał: krew żylna, surowicalosocze Pacjent: Michał Wróbel\n90010112345 PESEL: Data pobrania:l3-05-2026 08.30\nData urodzenia: 01-01-1 Data przyjęcial3-05-2026 1\nPłeć: Kobieta\nBiochemia\nBadanie Jednostka Zakres ref. Wynik\nGlucose 3.9 - 5.5 5.1 mmol/L\nCreatinine 106 53 78 = umol/L\neGFR 98 hllminl1.73m ^ > 90\n5.0 4.6 mmollL < Cholesterole\nALT 40 28 UIL <\nZatwierdził: Uwagi: Brak uwag.\nmgr Anna Nowak\nDiagnosta Laboratoryjny\nRaport testowy do ręcznego uzupełni\nStrona 1 Z 1",
-      "report_path": "reports\\images\\pacjent_07_glucose_mmol_normal_report.html"
+      "report_path": "reports\\images\\pacjent_09_glucose_mmol_normal_report.html"
     },
     {
-      "file": "pacjent_08_glucose_mmol_high.jpg",
+      "file": "pacjent_10_glucose_mmol_high.jpg",
       "value": 7.2,
       "unit": "mmol/L",
       "value_mgdl": 129.7,
@@ -101,7 +131,7 @@
         "Nie odczytano górnej granicy zakresu, użyto wartości domyślnej."
       ],
       "ocr_text": "Laboratorium Medyczne\nLM/2026/05/001234 ul. Zdrowa 15, 00-001 W Nr raportu:\ntel. 22 123 45 67\nData raportu: 13-05-2026 15\nNIP: 123-456-78-90\nMateriał: krew żylna, surowicalosocze Pacjent: Olga Dąbrowska\nPESEL: 90010112345 Data pobrania:l3-05-2026 08.30\nData urodzenia: 01-01-1 Data przyjęcial3-05-2026 12.\nPłeć: Kobieta\nBiochemia\nBadanie Zakres ref. Jednostka Wynik\n3.9 - 5.5 Glucose 7.2 mmol/L\nCreatinine 106 53 78 = umol/L\neGFR 98 hllminl1.73m ^ > 90\n5.0 4.6 mmollL < Cholesterole\nALT 40 28 UIL <\nZatwierdził: Uwagi: Brak uwag.\nmgr Anna Nowak\nDiagnosta Laboratoryjny\nRaport testowy do ręcznego uzupełnien\nStrona 1 Z 1",
-      "report_path": "reports\\images\\pacjent_08_glucose_mmol_high_report.html"
+      "report_path": "reports\\images\\pacjent_10_glucose_mmol_high_report.html"
     }
   ]
 }

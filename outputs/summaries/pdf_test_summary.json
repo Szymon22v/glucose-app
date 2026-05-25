@@ -1,7 +1,7 @@
 {
   "test_set": "PDF",
-  "total_tests": 8,
-  "correct_predictions": 8,
+  "total_tests": 10,
+  "correct_predictions": 10,
   "accuracy_percent": 100.0,
   "results": [
     {
@@ -91,6 +91,28 @@
       "correct": true,
       "validation_errors": [],
       "report_path": "reports\\pdf\\pacjent_08_skrajnie_niska_glukoza_hematologia_biochemia_z_zakresami_referencyjnymi_report.html"
+    },
+    {
+      "file": "pacjent_09_troche_powyzej_normy_hematologia_biochemia_z_zakresami_referencyjnymi.pdf",
+      "value": 112.0,
+      "unit": "mg/dL",
+      "value_mgdl": 112.0,
+      "expected_flag": "H",
+      "predicted_flag": "H",
+      "correct": true,
+      "validation_errors": [],
+      "report_path": "reports\\pdf\\pacjent_09_troche_powyzej_normy_hematologia_biochemia_z_zakresami_referencyjnymi_report.html"
+    },
+    {
+      "file": "pacjent_10_skrajnie_wysoka_glukoza_hematologia_biochemia_z_zakresami_referencyjnymi.pdf",
+      "value": 318.0,
+      "unit": "mg/dL",
+      "value_mgdl": 318.0,
+      "expected_flag": "H",
+      "predicted_flag": "H",
+      "correct": true,
+      "validation_errors": [],
+      "report_path": "reports\\pdf\\pacjent_10_skrajnie_wysoka_glukoza_hematologia_biochemia_z_zakresami_referencyjnymi_report.html"
     }
   ]
 }

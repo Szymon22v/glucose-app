@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analizator JSON - Glukoza</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <main class="page">
+        <section class="hero">
+            <div>
+                <p class="badge">Analizator dokumentacji medycznej</p>
+                <h1>Tester plików JSON</h1>
+                <p class="subtitle">
+                    Wklej dane JSON albo wybierz plik z wynikiem glukozy, aby sprawdzić klasyfikację H/L/N.
+                </p>
+            </div>
+        </section>
+
+        <section class="tabs">
+            <button class="tab active" data-tab="test">Test JSON</button>
+            <button class="tab" data-tab="examples">Przykładowe dane</button>
+            <button class="tab" data-tab="info">Opis działania</button>
+        </section>
+
+        <section id="test" class="tab-content active">
+            <div class="grid">
+                <div class="card">
+                    <h2>1. Dane wejściowe JSON</h2>
+
+                    <label class="file-label">
+                        Wybierz plik JSON:
+                        <input type="file" id="jsonFile" accept=".json,application/json">
+                    </label>
+
+                    <textarea id="jsonInput" spellcheck="false" placeholder="Wklej tutaj dane JSON..."></textarea>
+
+                    <div class="actions">
+                        <button id="runBtn">Analizuj JSON</button>
+                        <button id="clearBtn" class="secondary">Wyczyść</button>
+                    </div>
+
+                    <p id="errorBox" class="error hidden"></p>
+                </div>
+
+                <div class="card">
+                    <h2>2. Wynik analizy</h2>
+
+                    <div id="resultBox" class="result empty">
+                        Brak wyniku. Wklej JSON lub wybierz plik, a następnie kliknij „Analizuj JSON”.
+                    </div>
+
+                    <button id="downloadResultBtn" class="secondary hidden">
+                        Pobierz wynik JSON
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section id="examples" class="tab-content">
+            <div class="card">
+                <h2>Przykładowe dane testowe</h2>
+                <p>
+                    Poniżej znajdują się przykładowe pliki JSON. Możesz je pobrać albo automatycznie wczytać do testera.
+                </p>
+
+                <div id="examplesList" class="examples"></div>
+            </div>
+        </section>
+
+        <section id="info" class="tab-content">
+            <div class="card">
+                <h2>Opis działania testera</h2>
+                <p>
+                    Tester analizuje dane JSON zawierające wynik glukozy. Program wyszukuje parametr GLU,
+                    odczytuje wartość, jednostkę i zakres referencyjny, a następnie przypisuje flagę:
+                </p>
+
+                <ul>
+                    <li><strong>L</strong> — wynik poniżej normy,</li>
+                    <li><strong>N</strong> — wynik w normie,</li>
+                    <li><strong>H</strong> — wynik powyżej normy.</li>
+                </ul>
+
+                <p>
+                    Dla wartości zapisanych w mmol/L tester przelicza wynik na mg/dL.
+                    Moduł działa w przeglądarce i służy wyłącznie do testowania plików JSON.
+                </p>
+            </div>
+        </section>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>

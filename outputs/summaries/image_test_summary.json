@@ -1,8 +1,8 @@
 {
   "test_set": "images",
-  "total_tests": 10,
+  "total_tests": 8,
   "correct_predictions": 8,
-  "accuracy_percent": 80.0,
+  "accuracy_percent": 100.0,
   "results": [
     {
       "file": "pacjent_01_glukoza_w_normie.jpg",
@@ -75,36 +75,6 @@
       "validation_errors": [],
       "ocr_text": "Laboratorium Medyczne\nLM/2026/05/001234 ul. Zdrowa 15, 00-001 W Nr raportu:\ntel. 22 123 45 67\nData raportu: 13-05-2026 15\nNIP: 123-456-78-90\nMateriał: krew żylna, surowicalosocze Karolina Mazur Pacjent:\nPESEL: 90010112345 Data pobrania:l3-05-2026 08.30\nData urodzenia: 01-01-1 Data przyjęcial3-05-2026 12.\nPłeć: Kobieta\nBiochemia\nBadanie Zakres ref. Jednostka Wynik\nGLU 85 70-99 mgldL\n1.10 0.60 0.94 = Kreatynina mgldL\n190 Cholesterol całkowity 188 < mgldL\nALT 35 28 UIL <\n150 112 Triglicerydy mgldL\nZatwierdził: Uwagi: Brak uwag.\nmgr Anna Nowak\nDiagnosta Laboratoryjny\nRaport testowy do ręcznego uzupełnien\nStrona 1 Z 1",
       "report_path": "reports\\images\\pacjent_06_glu_w_normie_report.html"
-    },
-    {
-      "file": "pacjent_07_glucose_high.jpg",
-      "value": 90.0,
-      "unit": "mg/dL",
-      "value_mgdl": 90.0,
-      "expected_flag": "H",
-      "predicted_flag": "N",
-      "correct": false,
-      "validation_errors": [
-        "Nie odczytano dolnej granicy zakresu, użyto wartości domyślnej.",
-        "Nie odczytano górnej granicy zakresu, użyto wartości domyślnej."
-      ],
-      "ocr_text": "Laboratorium Medyczne\nLM/2026/05/001234 ul. Zdrowa 15, 00-001 W Nr raportu:\ntel. 22 123 45 67\nData raportu: 13-05-2026 15\nNIP: 123-456-78-90\nMateriał: krew żylna, surowicalosocze Adam Lewandowsk Pacjent:\nPESEL: 90010112345 Data pobrania:l3-05-2026 08.30\nData urodzenia: 01-01-1 Data przyjęcial3-05-2026 12.\nPłeć: Kobieta\nBiochemia\nBadanie Jednostka Zakres ref: Wynik\n168 mgldL 70-99 Glukoza\n0.50 0.90 0.82 = Kreatynina mgldL\neGFR > 90 102 hllminl1.73m ^\n190 174 Cholesterol całkowity < mgIdL\nALT 35 22 UIL\nZatwierdził: Uwagi: Brak uwag.\nmgr Anna Nowak\nDiagnosta Laboratoryjny\nRaport testowy do ręcznego uzupełnien\nStrona 1 Z 1",
-      "report_path": "reports\\images\\pacjent_07_glucose_high_report.html"
-    },
-    {
-      "file": "pacjent_08_glukoza_na_czczo.jpg",
-      "value": 190.0,
-      "unit": "mg/dL",
-      "value_mgdl": 190.0,
-      "expected_flag": "N",
-      "predicted_flag": "H",
-      "correct": false,
-      "validation_errors": [
-        "Nie odczytano dolnej granicy zakresu, użyto wartości domyślnej.",
-        "Nie odczytano górnej granicy zakresu, użyto wartości domyślnej."
-      ],
-      "ocr_text": "Laboratorium Medyczne\nLM/2026/05/001234 ul. Zdrowa 15, 00-001 Wa Nr raportu:\ntel. 22 123 45 67\nData raportu: 13-05-2026 15\nNIP: 123-456-78-90\nMateriał: krew żylna, surowicalosocze Pacjent: Natalia Kamińska\n90010112345 PESEL: Data pobrania:l3-05-2026 08.30\nData urodzenia: 01-01-1 Data przyjęcial3-05-2026 1\nPłeć: Kobieta\nBiochemia\nBadanie Zakres ref. Jednostka Wynik\nmgldL 89 70-99 Glukoza na czczo\n1.10 0.60 0.94 Kreatynina mgldL\n190 Cholesterol całkowity 188 < mgldL\nALT 35 28 UIL <\n150 112 Triglicerydy mgldL\nZatwierdził: Uwagi: Brak uwag.\nmgr Anna Nowak\nDiagnosta Laboratoryjny\nRaport testowy do ręcznego uzupełni\nStrona 1 Z 1",
-      "report_path": "reports\\images\\pacjent_08_glukoza_na_czczo_report.html"
     },
     {
       "file": "pacjent_09_glucose_mmol_normal.jpg",

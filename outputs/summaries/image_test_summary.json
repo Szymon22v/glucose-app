@@ -89,7 +89,7 @@
       "report_path": "reports\\images\\pacjent_07_glucose_mmol_normal_report.html"
     },
     {
-      "file": "pacjent_8_glucose_mmol_high.jpg",
+      "file": "pacjent_08_glucose_mmol_high.jpg",
       "value": 7.2,
       "unit": "mmol/L",
       "value_mgdl": 129.7,
@@ -101,7 +101,7 @@
         "Nie odczytano górnej granicy zakresu, użyto wartości domyślnej."
       ],
       "ocr_text": "Laboratorium Medyczne\nLM/2026/05/001234 ul. Zdrowa 15, 00-001 W Nr raportu:\ntel. 22 123 45 67\nData raportu: 13-05-2026 15\nNIP: 123-456-78-90\nMateriał: krew żylna, surowicalosocze Pacjent: Olga Dąbrowska\nPESEL: 90010112345 Data pobrania:l3-05-2026 08.30\nData urodzenia: 01-01-1 Data przyjęcial3-05-2026 12.\nPłeć: Kobieta\nBiochemia\nBadanie Zakres ref. Jednostka Wynik\n3.9 - 5.5 Glucose 7.2 mmol/L\nCreatinine 106 53 78 = umol/L\neGFR 98 hllminl1.73m ^ > 90\n5.0 4.6 mmollL < Cholesterole\nALT 40 28 UIL <\nZatwierdził: Uwagi: Brak uwag.\nmgr Anna Nowak\nDiagnosta Laboratoryjny\nRaport testowy do ręcznego uzupełnien\nStrona 1 Z 1",
-      "report_path": "reports\\images\\pacjent_8_glucose_mmol_high_report.html"
+      "report_path": "reports\\images\\pacjent_08_glucose_mmol_high_report.html"
     }
   ]
 }
